@@ -17,7 +17,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-change-this-to-a-secure-key'
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost',
+    'pms-t7l8.onrender.com',      # ✅ your Render domain
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+    'https://pms-t7l8.onrender.com',   # ✅ must include https://
+]
+
  # e.g. ['127.0.0.1', 'localhost']
 
 
