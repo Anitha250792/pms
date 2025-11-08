@@ -1,0 +1,281 @@
+{% extends 'base.html' %}
+{% block title %}📊 Team Member Dashboard{% endblock %}
+
+{% block content %}
+<style>
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(25px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .dashboard-container {
+    animation: fadeInUp 1s ease;
+  }
+
+  .dashboard-title {
+    color: #ffffff !important;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+    animation: pulseText 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes pulseText {
+    from { text-shadow: 0 0 8px rgba(255, 255, 255, 0.4); }
+    to { text-shadow: 0 0 20px rgba(255, 255, 255, 0.8); }
+  }
+
+  .card {
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 20px;
+    border: none;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+  }
+
+  .hover-scale:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  }
+
+  .progress {
+    border-radius: 15px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.4);
+  }
+
+  .progress-bar {
+    background: linear-gradient(90deg, #42a5f5, #26c6da);
+    transition: width 1s ease;
+  }
+
+  .chart-container {
+    position: relative;
+    height: 300px !important;
+    width: 100% !important;
+  }
+
+  .section-heading {
+    color: #ffffff !important;
+    text-shadow: 0 0 12px rgba(255,255,255,0.8);
+    animation: whiteGlow 2.5s ease-in-out infinite alternate;
+  }
+
+  @keyframes whiteGlow {
+    from { text-shadow: 0 0 8px rgba(255,255,255,0.6); }
+    to { text-shadow: 0 0 20px rgba(255,255,255,1); }
+  }
+
+  .badge {
+    font-size: 0.9rem;
+    border-radius: 8px;
+    font-weight: 600;
+  }
+</style>
+
+<div class="container mt-5 mb-5 dashboard-container">
+  <h2 class="text-center fw-bold mb-4 dashboard-title">
+    {% if viewing_as_manager %}
+      Viewing {{ member.username }}’s Dashboard 
+    {% else %}
+      Welcome {{ user.username }} — Team Member
+    {% endif %}
+  </h2>
+
+  {% if viewing_as_manager %}
+    
+    <div class="text-center mb-4">
+      <a href="{% url 'dashboard:dashboard' %}" class="btn btn-outline-secondary fw-semibold px-4">
+        ← Back to Manager Dashboard
+      </a>
+    </div>
+  {% endif %}
+
+  <!-- 🌟 Overview Cards -->
+  <div class="row text-center mb-4">
+    <div class="col-md-6 mb-3">
+      <div class="card hover-scale">
+        <div class="card-body">
+          <h5 class="text-success">Projects</h5>
+          <h2 class="fw-bold text-success display-6">{{ projects_count|default:0 }}</h2>
+          {% if not viewing_as_manager %}
+            <a href="{% url 'projects:project_create' %}" class="btn btn-success mt-2">Add Project</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 mb-3">
+      <div class="card hover-scale">
+        <div class="card-body">
+          <h5 class="text-info">Modules</h5>
+          <h2 class="fw-bold text-info display-6">{{ tasks_count|default:0 }}</h2>
+          {% if not viewing_as_manager %}
+            <a href="{% url 'tasks:task_create' %}" class="btn btn-info mt-2">Add Modules</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if not viewing_as_manager %}
+  <div class="text-center mt-4 mb-5">
+    <a href="{% url 'projects:project_list' %}" class="btn btn-outline-light fw-bold shadow-sm px-4 py-2">
+     View Assigned Projects
+    </a>
+  </div>
+  {% endif %}
+
+  <!-- ✅ Progress Bar -->
+  <div class="mt-4 mb-5">
+    <h5 class="fw-semibold text-center text-white mb-3">Modules Completion</h5>
+    <div class="progress" style="height: 25px;">
+      <div class="progress-bar progress-bar-striped progress-bar-animated fw-bold"
+           role="progressbar"
+           style="width: {{ progress_percent|default:0 }}%;">
+        {{ progress_percent|default:0 }}%
+      </div>
+    </div>
+  </div>
+
+  <!-- 📊 Charts Section -->
+  <div class="row mt-4 justify-content-center align-items-stretch">
+    <div class="col-md-6 mb-4 d-flex">
+      <div class="card shadow-sm p-3 flex-fill">
+        <h5 class="text-center text-primary mb-3">Project Priority Overview</h5>
+        <div class="chart-container">
+          <canvas id="priorityChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 mb-4 d-flex">
+      <div class="card shadow-sm p-3 flex-fill">
+        <h5 class="text-center text-success mb-3">Module Status Overview</h5>
+        <div class="chart-container">
+          <canvas id="statusChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="my-5">
+  <h4 class="fw-bold mb-3 text-center section-heading">Assigned Projects</h4>
+
+  <div class="table-responsive">
+    <table class="table table-hover table-bordered align-middle shadow-lg text-center">
+      <thead class="bg-primary text-white">
+        <tr>
+          <th>Project Name</th>
+          <th>Assigned Date</th>
+          <th>Delivery Date</th>
+          <th>Status</th>
+          <th>Completion</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for project in assigned_projects %}
+        <tr>
+          <td class="fw-bold">{{ project.name }}</td>
+          <td>{{ project.assigned_date }}</td>
+          <td>{{ project.delivery_date }}</td>
+
+          <td>
+            {% if project.status == "Completed" %}
+              <span class="badge bg-success">Completed</span>
+            {% elif project.status == "In Progress" %}
+              <span class="badge bg-warning text-dark">In Progress</span>
+            {% elif project.status == "On Hold" %}
+              <span class="badge bg-secondary">On Hold</span>
+            {% else %}
+              <span class="badge bg-info text-dark">Pending</span>
+            {% endif %}
+          </td>
+
+          <td style="min-width: 150px;">
+            <div class="progress mb-2" style="height: 20px;">
+              <div class="progress-bar fw-bold"
+                   role="progressbar"
+                   style="width: {{ project.completion|default:0 }}%;
+                          background: {{ project.progress_color }};"
+                   id="progress-bar-{{ project.id }}">
+                {{ project.completion|default:0 }}%
+              </div>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="text-center text-muted">No assigned projects found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ✅ Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const rawPriorityData = {{ project_priority_data|default:"[]"|safe }};
+  const rawStatusData = {{ task_status_data|default:"[]"|safe }};
+
+  const allPriorities = ["High", "Medium", "Low"];
+  const priorityCounts = allPriorities.map(p => {
+    const found = rawPriorityData.find(d => d.priority === p);
+    return found ? found.count : 0;
+  });
+
+  const ctxPriority = document.getElementById("priorityChart").getContext("2d");
+  new Chart(ctxPriority, {
+    type: "doughnut",
+    data: {
+      labels: allPriorities,
+      datasets: [{
+        data: priorityCounts,
+        backgroundColor: ["#e74c3c", "#f1c40f", "#2ecc71"],
+        borderColor: "#fff",
+        borderWidth: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: "65%",
+      plugins: {
+        legend: { position: "right" }
+      }
+    }
+  });
+
+  const statusLabels = rawStatusData.map(t => t.status || "Unknown");
+  const statusCounts = rawStatusData.map(t => t.count);
+  const ctxStatus = document.getElementById("statusChart").getContext("2d");
+  new Chart(ctxStatus, {
+    type: "bar",
+    data: {
+      labels: statusLabels,
+      datasets: [{
+        label: "Task Count",
+        data: statusCounts,
+        backgroundColor: ["#3498db", "#f39c12", "#27ae60"],
+        borderColor: "#fff",
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: { y: { beginAtZero: true } },
+      plugins: { legend: { display: false } }
+    }
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block title %}🌟 My Projects{% endblock %}
+
+{% block content %}
+<style>
+  /* 🌈 Smooth fade-in animation for page load */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(25px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .projects-container {
+    animation: fadeInUp 1s ease;
+    margin-top: 3rem;
+  }
+
+  /* 💎 Header styling */
+  .page-header {
+    text-align: center;
+    color: #2196f3;
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(33,150,243,0.3);
+    margin-bottom: 2rem;
+    letter-spacing: 1px;
+  }
+
+  /* 💼 Project card style */
+  .project-card {
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 15px;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 1.2rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .project-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 25px rgba(33,150,243,0.3);
+  }
+
+  .project-title {
+    color: #1976d2;
+    font-weight: 700;
+  }
+
+  .project-description {
+    color: #555;
+    font-size: 0.95rem;
+  }
+
+  /* 🌟 No project alert */
+  .alert-custom {
+    background: linear-gradient(90deg, #ffcc80, #ffb74d);
+    border: none;
+    color: #333;
+    font-weight: 500;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 10px;
+  }
+
+  /* ✨ Add Project button */
+  .btn-add {
+    display: inline-block;
+    background: linear-gradient(45deg, #42a5f5, #26c6da);
+    color: #fff !important;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .btn-add:hover {
+    background: linear-gradient(45deg, #1e88e5, #0097a7);
+    box-shadow: 0 0 15px rgba(33,150,243,0.5);
+    transform: scale(1.05);
+  }
+
+  /* 💫 Icon before title */
+  .page-header i {
+    color: #26c6da;
+  }
+</style>
+
+<div class="projects-container container">
+  <h2 class="page-header">Your Projects</h2>
+
+  {% if projects %}
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        {% for project in projects %}
+  <a href="{% url 'projects:project_detail' project.id %}" class="text-decoration-none">
+    <div class="project-card">
+     <h5 class="project-title">
+  {{ project.name }}
+  {% if project.assigned_to and project.assigned_to.id == request.user.id %}
+    <span class="badge bg-info text-dark ms-2">Assigned</span>
+  {% elif project.owner and project.owner.id == request.user.id %}
+    <span class="badge bg-success ms-2">Created</span>
+  {% else %}
+    <span class="badge bg-secondary text-light ms-2">Unassigned</span>
+  {% endif %}
+</h5>
+
+
+      <p class="project-description mb-0">
+        {{ project.description|truncatechars:100 }}
+      </p>
+    </div>
+  </a>
+{% endfor %}
+
+      </div>
+    </div>
+  {% else %}
+    <div class="text-center">
+      <div class="alert alert-custom d-inline-block">
+        No projects yet. Start by adding one!
+      </div>
+      <div class="mt-4">
+        <a href="{% url 'projects:project_create' %}" class="btn btn-add">
+          <i class="bi bi-plus-circle me-1"></i> Add New Project
+        </a>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

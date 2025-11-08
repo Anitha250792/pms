@@ -1,0 +1,396 @@
+{% extends 'base.html' %}
+{% block title %}📊 Manager Dashboard{% endblock %}
+
+{% block content %}
+<style>
+  /* 🌈 Gradient Animated Background */
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* ✨ Page Animation */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .dashboard-container {
+    animation: fadeInUp 1s ease-in-out;
+  }
+
+  /* 💎 Cards */
+  .card {
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.85);
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+  }
+
+  .hover-scale:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  }
+
+  /* 🌟 Progress Bar */
+  .progress {
+    border-radius: 15px;
+    overflow: hidden;
+    background: white;
+  }
+  .progress-bar {
+    background: linear-gradient(90deg, #42a5f5, #26c6da);
+    transition: width 1s ease;
+  }
+
+  /* 📊 Charts */
+  #priorityChart, #statusChart {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 10px;
+  }
+
+  /* 🧠 Functional Requirements Table */
+  .functional-table thead {
+    background: linear-gradient(90deg, #26c6da, #42a5f5);
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .functional-table tbody tr:hover {
+    background-color: #f1f8e9;
+  }
+
+  /* 📋 Projects Table */
+  .team-table thead {
+    background: linear-gradient(90deg, #42a5f5, #66bb6a);
+    color: white;
+    font-weight: 600;
+  }
+
+  .team-table tbody tr:hover {
+    background-color: #e3f2fd;
+  }
+
+  /* 🪄 Title Styling */
+  .dashboard-title {
+    color: #fff !important;
+    text-shadow: 0 0 15px rgba(255,255,255,0.7);
+    animation: pulseText 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes pulseText {
+    from { text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+    to { text-shadow: 0 0 25px rgba(255,255,255,0.9); }
+  }
+
+  /* 🏷️ Badges */
+  .badge {
+    font-size: 0.9rem;
+    border-radius: 8px;
+  }
+
+  /* 🌟 White Animated Heading Style */
+  .dashboard-heading-white {
+    color: #ffffff !important;
+    text-shadow: 0 0 12px rgba(255,255,255,0.8);
+    font-weight: 700;
+    letter-spacing: 1px;
+    animation: whiteGlow 2.5s ease-in-out infinite alternate;
+  }
+
+  @keyframes whiteGlow {
+    from { text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+    to { text-shadow: 0 0 25px rgba(255,255,255,1); }
+  }
+
+  /* 🧭 View Dashboard Button Styling */
+  .btn-outline-primary {
+    border: 2px solid #42a5f5;
+    color: #1565c0;
+    transition: all 0.3s ease;
+    border-radius: 10px;
+  }
+
+  .btn-outline-primary:hover {
+    background: linear-gradient(45deg, #42a5f5, #26c6da);
+    color: white !important;
+    transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(66,165,245,0.5);
+  }
+</style>
+
+<!-- 🌟 Manager Dashboard Content -->
+<div class="container mt-5 mb-5 dashboard-container">
+  <h2 class="text-center fw-bold mb-4 dashboard-title">
+     Manager Dashboard — Welcome, {{ user.username }}
+  </h2>
+
+  <!-- Overview Cards -->
+  <div class="row text-center mb-4">
+    <div class="col-md-6 mb-3">
+      <div class="card hover-scale">
+        <div class="card-body">
+          <h5 class="fw-semibold text-primary"> Total Projects</h5>
+          <h2 class="fw-bold text-primary display-6">{{ projects_count|default:0 }}</h2>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 mb-3">
+      <div class="card hover-scale">
+        <div class="card-body">
+          <h5 class="fw-semibold text-warning"> Total Tasks</h5>
+          <h2 class="fw-bold text-warning display-6">{{ tasks_count|default:0 }}</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="mt-4 mb-5">
+    <h4 class="fw-bold mb-3 text-center dashboard-heading-white">Overall Task Completion</h4>
+    <div class="progress" style="height: 25px;">
+      <div class="progress-bar progress-bar-striped progress-bar-animated fw-bold"
+           role="progressbar"
+           style="width: {{ progress_percent|default:0 }}%;">
+        {{ progress_percent|default:0 }}%
+      </div>
+    </div>
+  </div>
+
+  <!-- 📊 Charts -->
+  <div class="row mt-4 justify-content-center align-items-stretch">
+    <div class="col-md-6 mb-4 d-flex">
+      <div class="card shadow-sm p-3 flex-fill">
+        <h5 class="text-center text-primary mb-3">Project Priority Overview</h5>
+        <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
+          <canvas id="priorityChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 mb-4 d-flex">
+      <div class="card shadow-sm p-3 flex-fill">
+        <h5 class="text-center text-success mb-3">Task Status Overview</h5>
+        <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
+          <canvas id="statusChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🧠 Functional Requirements Table -->
+  <hr class="my-5" />
+  <h4 class="fw-bold mb-3 text-center dashboard-heading-white">
+    Functional Requirements Priority Overview
+  </h4>
+
+  <div class="table-responsive">
+    <table class="table table-hover table-bordered align-middle shadow-sm functional-table">
+      <thead class="text-center">
+        <tr>
+          <th>Requirement ID</th>
+          <th>Description</th>
+          <th>Priority</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for fr in functional_requirements %}
+          <tr>
+            <td class="fw-bold text-center">{{ fr.id }}</td>
+            <td>{{ fr.desc }}</td>
+            <td class="text-center">
+              {% if fr.priority == "High" %}
+                <span class="badge bg-danger px-3 py-2">High</span>
+              {% elif fr.priority == "Medium" %}
+                <span class="badge bg-warning text-dark px-3 py-2">Medium</span>
+              {% else %}
+                <span class="badge bg-success px-3 py-2">Low</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="3" class="text-center text-muted">No requirements available.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 🧩 Team Projects Summary -->
+  <!-- 🧩 Team Projects Summary -->
+<hr class="my-5" />
+<h4 class="fw-bold mb-3 text-center dashboard-heading-white"> Team Projects Summary</h4>
+
+<div class="text-end mb-3">
+  <a href="{% url 'projects:project_create' %}" class="btn btn-success fw-semibold shadow-sm">
+     Assign New Project
+  </a>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-hover table-bordered align-middle shadow-sm team-table">
+    <thead class="text-center">
+      <tr>
+        <th>Project</th>
+        <th>Owner</th>
+        <th>Status</th>
+        <th>Priority</th>
+        <th>Completion</th>
+        <th>Assign Project</th>
+        <th>View Dashboard</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for project in projects %}
+      <tr>
+        <td class="fw-semibold">{{ project.name }}</td>
+        <td>{{ project.owner.username|default:"N/A" }}</td>
+
+        <!-- Status -->
+        <td class="text-center">
+          {% if project.status == "Completed" %}
+            <span class="badge bg-success">Completed</span>
+          {% elif project.status == "In Progress" %}
+            <span class="badge bg-warning text-dark">In Progress</span>
+          {% elif project.status == "On Hold" %}
+            <span class="badge bg-secondary">On Hold</span>
+          {% else %}
+            <span class="badge bg-info text-dark">Pending</span>
+          {% endif %}
+        </td>
+
+        <!-- Priority -->
+        <td class="text-center">
+          {% if project.priority == "High" %}
+            <span class="badge bg-danger">High</span>
+          {% elif project.priority == "Medium" %}
+            <span class="badge bg-warning text-dark">Medium</span>
+          {% else %}
+            <span class="badge bg-success">Low</span>
+          {% endif %}
+        </td>
+
+        <!-- Completion -->
+        <td style="min-width: 160px;">
+          <div class="progress" style="height: 20px;">
+            <div class="progress-bar fw-bold"
+                 role="progressbar"
+                 style="width: {{ project.completion|default:0 }}%;
+                        background: {{ project.progress_color }};">
+              {{ project.completion|default:0 }}%
+            </div>
+          </div>
+        </td>
+
+        <!-- ✅ Assign Project -->
+        <td>
+  {% if user_role == "Manager" %}
+    <select class="form-select assign-dropdown" data-project-id="{{ project.id }}">
+      <option value="">-- Assign To --</option>
+      {% for member in team_summary %}
+        <option value="{{ member.id }}"
+          {% if project.assigned_to and project.assigned_to.id == member.id %}
+            selected
+          {% endif %}
+        >
+          {{ member.username }}
+        </option>
+      {% endfor %}
+    </select>
+  {% else %}
+    {% if project.assigned_to %}
+      {{ project.assigned_to.username }}
+    {% else %}
+      Unassigned
+    {% endif %}
+  {% endif %}
+</td>
+
+
+        <!-- View Dashboard -->
+<td class="text-center">
+  {% if project.assigned_to %}
+    <a href="{% url 'dashboard:member_dashboard' project.assigned_to.id %}"
+       class="btn btn-sm btn-outline-primary fw-semibold">
+      View {{ project.assigned_to.username }}'s Dashboard
+    </a>
+  {% else %}
+    <button class="btn btn-sm btn-secondary fw-semibold" disabled title="No team member assigned">
+      Not Assigned
+    </button>
+  {% endif %}
+</td>
+
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" class="text-center text-muted">No projects found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+
+<!-- ✅ Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const priorityData = {{ project_priority_data|default:"[]"|safe }};
+  const statusData = {{ task_status_data|default:"[]"|safe }};
+
+  const priorityLabels = priorityData.map(p => p.priority || "Unknown");
+  const priorityCounts = priorityData.map(p => p.count);
+  const statusLabels = statusData.map(t => t.status || "Unknown");
+  const statusCounts = statusData.map(t => t.count);
+
+  // 🌈 Project Priority Donut Chart
+  new Chart(document.getElementById('priorityChart'), {
+    type: 'doughnut',
+    data: {
+      labels: priorityLabels,
+      datasets: [{
+        data: priorityCounts,
+        backgroundColor: ['#e74c3c', '#f1c40f', '#2ecc71'],
+        borderColor: '#fff',
+        borderWidth: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      cutout: '65%',
+      plugins: {
+        legend: { position: 'right', labels: { color: '#333', font: { size: 13, weight: 'bold' } } },
+        title: { display: false }
+      }
+    }
+  });
+
+  // 🎨 Task Status Bar Chart
+  new Chart(document.getElementById('statusChart'), {
+    type: 'bar',
+    data: {
+      labels: statusLabels,
+      datasets: [{
+        label: 'Task Count',
+        data: statusCounts,
+        backgroundColor: ['#3498db', '#f39c12', '#27ae60'],
+        borderColor: '#fff',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: { beginAtZero: true, ticks: { color: '#555' } },
+        x: { ticks: { color: '#555' } }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+</script>
+{% endblock %}

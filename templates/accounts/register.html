@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+{% block title %}📊 Register{% endblock %}
+
+{% block content %}
+<style>
+  /* 🌆 Business blurred background */
+  body {
+    background: url("https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1920&q=80")
+                no-repeat center center fixed;
+    background-size: cover;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* 🔮 Animated overlay */
+  body::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(-45deg,
+                rgba(255, 204, 188, 0.45),
+                rgba(248, 187, 208, 0.45),
+                rgba(179, 229, 252, 0.45),
+                rgba(200, 230, 201, 0.45));
+    background-size: 400% 400%;
+    animation: gradientShift 12s ease infinite;
+    backdrop-filter: blur(8px);
+    z-index: 0;
+  }
+
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* 🌿 Centering wrapper — fixes offset from base.html padding */
+  .register-wrapper {
+    position: relative;
+    z-index: 1;
+    min-height: calc(100vh - 80px); /* account for navbar */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 15px;
+    margin-top: -60px; /* adjust upward for perfect centering */
+  }
+
+  /* 💎 Register card glass effect */
+  .register-card {
+    backdrop-filter: blur(15px);
+    background: rgba(255, 255, 255, 0.92);
+    border-radius: 25px;
+    box-shadow: 0 0 35px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease-in-out;
+    width: 30rem;
+  }
+
+  .register-card:hover {
+    transform: translateY(-5px);
+  }
+
+  /* ✨ Buttons */
+  .btn-register {
+    background: linear-gradient(45deg, #26a69a, #66bb6a);
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+  }
+
+  .btn-register:hover {
+    box-shadow: 0 0 20px #26a69a;
+    transform: scale(1.05);
+  }
+   form {
+    width: 100%;
+    padding: 10px 25px;
+  }
+
+  /* Use grid for two-column layout */
+  form .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.2rem 1.5rem; /* row-gap column-gap */
+  }
+
+  /* Make specific fields full-width */
+  .form-grid .full-width {
+    grid-column: 1 / -1;
+  }
+
+  /* 🏷️ Label */
+  .form-label {
+    display: block;
+    font-weight: 600;
+    color: #2f3e46;
+    margin-bottom: 6px;
+    font-size: 0.95rem;
+  }
+
+  /* ✏️ Input fields */
+  .form-control {
+    width: 100%;
+    height: 45px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+  }
+
+  .form-control:focus {
+    border-color: #26a69a;
+    box-shadow: 0 0 0 0.15rem rgba(38, 166, 154, 0.25);
+    outline: none;
+  }
+
+  /* 👁️ Password input-group */
+  .input-group {
+    display: flex;
+    align-items: center;
+  }
+
+  .input-group .form-control {
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+  }
+
+  .input-group-text {
+    border-radius: 0 8px 8px 0;
+    background-color: #f9f9f9;
+    border-left: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+  }
+
+  /* ⚠️ Error messages */
+  .text-danger.small {
+    font-size: 0.85rem;
+    margin-top: 4px;
+  }
+
+  /* 🔘 Submit button */
+  .btn-register {
+    width: 100%;
+    border-radius: 10px;
+    padding: 11px 0;
+    font-weight: 600;
+    background: linear-gradient(45deg, #26a69a, #66bb6a);
+    color: #fff;
+    font-size: 1rem;
+    letter-spacing: 0.4px;
+    border: none;
+    transition: all 0.3s ease;
+  }
+
+  .btn-register:hover {
+    background: linear-gradient(45deg, #43a047, #81c784);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(76, 175, 80, 0.35);
+  }
+
+  /* 📱 Responsive layout (stack form fields on small screens) */
+  @media (max-width: 768px) {
+    form .form-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  </style>
+
+<!-- 🌟 Centered Register Card -->
+<div class="register-wrapper">
+  <div class="register-card p-4 shadow-lg">
+    <div class="card-body">
+      <h2 class="text-center mb-4 fw-bold text-success"> Create Your Account</h2>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} text-center">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <form method="POST" action="{% url 'accounts:register' %}">
+  {% csrf_token %}
+  
+  <div class="form-grid">
+    <!-- Username -->
+    <div>
+      <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
+      {{ form.username }}
+      {% if form.username.errors %}
+        <div class="text-danger small mt-1">{{ form.username.errors|striptags }}</div>
+      {% endif %}
+    </div>
+
+    <!-- Email -->
+    <div>
+      <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
+      {{ form.email }}
+      {% if form.email.errors %}
+        <div class="text-danger small mt-1">{{ form.email.errors|striptags }}</div>
+      {% endif %}
+    </div>
+
+    <!-- Role -->
+    <div>
+      <label for="{{ form.role.id_for_label }}" class="form-label">{{ form.role.label }}</label>
+      {{ form.role }}
+      {% if form.role.errors %}
+        <div class="text-danger small mt-1">{{ form.role.errors|striptags }}</div>
+      {% endif %}
+    </div>
+
+    <!-- Password -->
+    <div>
+      <label for="id_password1" class="form-label">Password</label>
+      <div class="input-group">
+        {{ form.password1 }}
+        <span class="input-group-text" id="togglePassword1">
+          <i class="bi bi-eye-slash" id="icon1"></i>
+        </span>
+      </div>
+      {% if form.password1.errors %}
+        <div class="text-danger small mt-1">{{ form.password1.errors|striptags }}</div>
+      {% endif %}
+    </div>
+
+    <!-- Confirm Password (Full width) -->
+    <div class="full-width">
+      <label for="id_password2" class="form-label">Confirm Password</label>
+      <div class="input-group">
+        {{ form.password2 }}
+        <span class="input-group-text" id="togglePassword2">
+          <i class="bi bi-eye-slash" id="icon2"></i>
+        </span>
+      </div>
+      {% if form.password2.errors %}
+        <div class="text-danger small mt-1">{{ form.password2.errors|striptags }}</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Submit -->
+  <div class="d-grid mt-4">
+    <button type="submit" class="btn btn-register">Register</button>
+  </div>
+
+  
+</form>
+
+
+      <p class="text-center mt-3 mb-0">
+        Already have an account?
+        <a href="{% url 'accounts:login' %}" class="fw-bold text-success text-decoration-none">Login here</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- 👁️ Password Toggle Script -->
+<script>
+  function togglePassword(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+    input.setAttribute('type', type);
+    icon.classList.toggle('bi-eye');
+    icon.classList.toggle('bi-eye-slash');
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('togglePassword1').addEventListener('click', function() {
+      togglePassword('id_password1', 'icon1');
+    });
+    document.getElementById('togglePassword2').addEventListener('click', function() {
+      togglePassword('id_password2', 'icon2');
+    });
+  });
+</script>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+{% endblock %}
