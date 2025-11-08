@@ -26,8 +26,21 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
 ]
 
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost',
+    'pms-t7l8.onrender.com',      # ✅ your Render domain
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+    'https://pms-t7l8.onrender.com',   # ✅ must include https://
+]
+
 if RENDER_EXTERNAL_HOSTNAME:
     CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_EXTERNAL_HOSTNAME}")
+
 
 # --------------------------------------------------------
 # APPLICATIONS
