@@ -1,184 +1,163 @@
 {% extends 'base.html' %}
-{% block title %}My Tasks{% endblock %}
+{% block title %}My Modules{% endblock %}
 
 {% block content %}
 <style>
-  /* 🌈 Page fade-in animation */
-  @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(25px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+  @keyframes fadeInUp { from{opacity:0;transform:translateY(25px);} to{opacity:1;transform:translateY(0);} }
 
-  /* 💎 Main container */
   .tasks-container {
-    margin-top: 70px;
-    backdrop-filter: blur(12px);
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 20px;
-    padding: 2rem;
-    box-shadow: 0 0 25px rgba(0, 0, 0, 0.15);
-    animation: fadeInUp 1s ease;
+    margin-top:90px;
+    animation:fadeInUp 1s;
+    background:rgba(255,255,255,0.9);
+    padding:25px;
+    border-radius:20px;
   }
 
-  /* 🧩 Header */
-  .tasks-header {
-    text-align: center;
-    font-weight: 700;
-    color: #0288d1;
-    text-shadow: 0 0 10px rgba(2, 136, 209, 0.3);
-    margin-bottom: 2rem;
+  .filter-box {
+    background:white; padding:15px; border-radius:12px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.1);
+    margin-bottom:15px;
   }
 
-  /* 🌟 Add Task button */
-  .btn-add-task {
-    background: linear-gradient(45deg, #42a5f5, #26c6da);
-    color: white !important;
-    border: none;
-    border-radius: 12px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    padding: 10px 18px;
-  }
-
-  .btn-add-task:hover {
-    background: linear-gradient(45deg, #1e88e5, #00acc1);
-    box-shadow: 0 0 20px rgba(33,150,243,0.5);
-    transform: scale(1.05);
-  }
-
-  /* ✨ Table styling */
-  .table {
-    border-radius: 15px;
-    overflow: hidden;
-    background: rgba(255, 255, 255, 0.95);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  }
-
-  .table thead {
-    background: linear-gradient(90deg, #0288d1, #26c6da);
-    color: white;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .table tbody tr {
-    transition: all 0.2s ease;
-  }
-
-  .table tbody tr:hover {
-    background: rgba(224, 247, 250, 0.7);
-    transform: scale(1.01);
-  }
-
-  /* 🔖 Badge styling */
-  .badge {
-    font-size: 0.85rem;
-    padding: 6px 10px;
-    border-radius: 8px;
-    font-weight: 600;
-  }
-
-  .badge.bg-danger {
-    background: linear-gradient(45deg, #ef5350, #e53935);
-  }
-
-  .badge.bg-warning {
-    background: linear-gradient(45deg, #fbc02d, #fdd835);
-  }
-
-  .badge.bg-success {
-    background: linear-gradient(45deg, #43a047, #66bb6a);
-  }
-
-  /* 🧭 Action buttons */
-  .btn-outline-primary, .btn-outline-danger {
-    font-weight: 600;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-  }
-
-  .btn-outline-primary:hover {
-    background: linear-gradient(45deg, #42a5f5, #26c6da);
-    color: white;
-    box-shadow: 0 0 10px rgba(66,165,245,0.4);
-  }
-
-  .btn-outline-danger:hover {
-    background: linear-gradient(45deg, #e53935, #ef5350);
-    color: white;
-    box-shadow: 0 0 10px rgba(239,83,80,0.4);
-  }
-
-  /* 🚫 No tasks found */
-  .no-tasks {
-    background: linear-gradient(90deg, #ffcc80, #ffe082);
-    border-radius: 10px;
-    padding: 1rem;
-    color: #444;
-    font-weight: 500;
-    text-align: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  }
+  .overdue { color:red; font-weight:700; }
+  .due-soon { color:#e65100; font-weight:700; }
 </style>
 
 <div class="container tasks-container">
-  <h2 class="tasks-header">My Modules</h2>
 
-  <div class="text-end mb-4">
-    <a href="{% url 'tasks:task_create' %}" class="btn btn-add-task">
-      Add New Module
-    </a>
+  <h2 class="text-center text-primary fw-bold mb-4">Modules</h2>
+
+  <!-- SEARCH + FILTERS + SORT -->
+  <div class="filter-box">
+    <form method="GET" class="row g-2">
+
+      <div class="col-md-3">
+        <input type="text" name="q" placeholder="Search…" value="{{ request.GET.q }}" class="form-control">
+      </div>
+
+      <div class="col-md-2">
+        <select name="priority" class="form-control">
+          <option value="">Priority</option>
+          <option value="High" {% if request.GET.priority == "High" %}selected{% endif %}>High</option>
+          <option value="Medium" {% if request.GET.priority == "Medium" %}selected{% endif %}>Medium</option?
+          <option value="Low" {% if request.GET.priority == "Low" %}selected{% endif %}>Low</option>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <select name="status" class="form-control">
+          <option value="">Status</option>
+          <option value="Pending" {% if request.GET.status == "Pending" %}selected{% endif %}>Pending</option>
+          <option value="In Progress" {% if request.GET.status == "In Progress" %}selected{% endif %}>In Progress</option>
+          <option value="Completed" {% if request.GET.status == "Completed" %}selected{% endif %}>Completed</option>
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <select name="sort" class="form-control">
+          <option value="">Sort By</option>
+          <option value="title" {% if request.GET.sort == "title" %}selected{% endif %}>Title (A–Z)</option>
+          <option value="-title" {% if request.GET.sort == "-title" %}selected{% endif %}>Title (Z–A)</option>
+          <option value="priority" {% if request.GET.sort == "priority" %}selected{% endif %}>Priority</option>
+          <option value="-due_date" {% if request.GET.sort == "-due_date" %}selected{% endif %}>Latest Due Date</option>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <button class="btn btn-primary w-100"><i class="bi bi-search"></i> Apply</button>
+      </div>
+
+    </form>
   </div>
 
-  <div class="table-responsive">
-    <table class="table align-middle text-center">
-      <thead>
-        <tr>
-          <th>Title</th>
-          <th>Status</th>
-          <th>Priority</th>
-          <th>Due Date</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for task in tasks %}
-        <tr>
-          <td class="fw-semibold text-dark">{{ task.title }}</td>
-          <td>
-            {% if task.status == "Completed" %}
-              <span class="badge bg-success">Completed</span>
-            {% elif task.status == "In Progress" %}
-              <span class="badge bg-warning text-dark">In Progress</span>
-            {% else %}
-              <span class="badge bg-danger">Pending</span>
+  {% if tasks %}
+    <div class="table-responsive">
+      <table class="table text-center align-middle">
+        <thead class="table-primary">
+          <tr>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Priority</th>
+            <th>Completion</th>
+            <th>Due Date</th>
+            {% if request.user.role not in "HR Manager" %}
+              <th>Actions</th>
             {% endif %}
-          </td>
-          <td>
-            {% if task.priority == "High" %}
-              <span class="badge bg-danger">High</span>
-            {% elif task.priority == "Medium" %}
-              <span class="badge bg-warning text-dark">Medium</span>
-            {% else %}
-              <span class="badge bg-success">Low</span>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for task in tasks %}
+          <tr>
+            <td class="fw-semibold">
+              <a href="{% if request.user.role in 'HR Manager' %}
+                         {% url 'tasks:task_detail_readonly' task.pk %}
+                       {% else %}
+                         {% url 'tasks:task_detail' task.pk %}
+                       {% endif %}"
+                 class="text-decoration-none text-dark">
+                {{ task.title }}
+              </a>
+            </td>
+
+            <td>
+              {% if task.status == "Completed" %}<span class="badge bg-success">Completed</span>
+              {% elif task.status == "In Progress" %}<span class="badge bg-warning text-dark">In Progress</span>
+              {% else %}<span class="badge bg-danger">Pending</span>
+              {% endif %}
+            </td>
+
+            <td>
+              {% if task.priority == "High" %}<span class="badge bg-danger">High</span>
+              {% elif task.priority == "Medium" %}<span class="badge bg-warning text-dark">Medium</span>
+              {% else %}<span class="badge bg-success">Low</span>
+              {% endif %}
+            </td>
+
+            <td>
+              <div class="progress">
+                <div class="progress-bar
+                {% if task.completion < 40 %} bg-danger
+                {% elif task.completion < 70 %} bg-warning
+                {% else %} bg-success {% endif %}"
+                style="width: {{ task.completion }}%">
+                </div>
+              </div>
+              <small>{{ task.completion }}%</small>
+            </td>
+
+            <td>
+              {{ task.due_date|date:"M d, Y" }}
+              {% if task.due_date %}
+                {% now "U" as nowTs %}
+                {% with due=task.due_date|date:"U" %}
+                  {% if due < nowTs %}
+                    <div class="overdue">⚠️ Overdue!</div>
+                  {% elif due < nowTs|add:"172800" %}
+                    <div class="due-soon">⏳ Due Soon</div>
+                  {% endif %}
+                {% endwith %}
+              {% endif %}
+            </td>
+
+            {% if request.user.role not in "HR Manager" %}
+            <td>
+              <a href="{% url 'tasks:task_edit' task.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+              <form action="{% url 'tasks:task_delete' task.pk %}" method="POST" style="display:inline;">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+              </form>
+            </td>
             {% endif %}
-          </td>
-          <td>{{ task.due_date|date:"M d, Y" }}</td>
-          <td>
-            <a href="{% url 'tasks:task_edit' task.pk %}" class="btn btn-sm btn-outline-primary">
-              <i class="bi bi-pencil"></i> Edit
-            </a>
-            
-          </td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td colspan="5" class="no-tasks">🚀 No Modules found. Start by adding one!</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+          </tr>
+          {% endfor %}
+        </tbody>
+
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-warning text-center">No Modules Found</div>
+  {% endif %}
+
 </div>
 {% endblock %}

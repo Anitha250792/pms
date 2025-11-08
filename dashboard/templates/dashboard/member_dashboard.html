@@ -96,6 +96,23 @@
     </div>
   {% endif %}
 
+  <div class="card shadow-sm mb-3">
+  <div class="card-header bg-dark text-white">Team Announcements</div>
+  <div class="card-body">
+    {% for msg in announcements %}
+      <!-- announcements is a list of length 0 or 1 containing the latest message -->
+      <p class="mb-2">
+        <strong>{{ msg.sender.username|default:"HR" }}</strong>:
+        {{ msg.content }}
+      </p>
+      <small class="text-muted">{{ msg.created_at }}</small>
+    {% empty %}
+      <p class="text-muted">No messages yet.</p>
+    {% endfor %}
+  </div>
+</div>
+
+
   <!-- 🌟 Overview Cards -->
   <div class="row text-center mb-4">
     <div class="col-md-6 mb-3">
@@ -220,6 +237,7 @@
 </div>
 
 <!-- ✅ Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -277,5 +295,17 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   });
 });
+
+function showSuccess(msg) {
+    Swal.fire({
+        toast: true,
+        position: "top-end",
+        icon: "success",
+        title: msg,
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+    });
+}
 </script>
 {% endblock %}

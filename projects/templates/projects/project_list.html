@@ -3,129 +3,105 @@
 
 {% block content %}
 <style>
-  /* 🌈 Smooth fade-in animation for page load */
-  @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(25px); }
-    to { opacity: 1; transform: translateY(0); }
+  @keyframes fadeInUp { from { opacity:0; transform:translateY(25px);} to { opacity:1; transform:translateY(0);} }
+
+  .projects-container { animation:fadeInUp 1s; margin-top:90px; }
+
+  .page-header { text-align:center; color:white; font-weight:700; margin-bottom:1rem; }
+
+  .filter-box {
+    background:white; padding:15px; border-radius:12px;
+    box-shadow:0 3px 15px rgba(0,0,0,0.15);
+    margin-bottom:25px;
   }
 
-  .projects-container {
-    animation: fadeInUp 1s ease;
-    margin-top: 3rem;
-  }
-
-  /* 💎 Header styling */
-  .page-header {
-    text-align: center;
-    color: #2196f3;
-    font-weight: 700;
-    text-shadow: 0 0 10px rgba(33,150,243,0.3);
-    margin-bottom: 2rem;
-    letter-spacing: 1px;
-  }
-
-  /* 💼 Project card style */
   .project-card {
-    backdrop-filter: blur(10px);
-    background: rgba(255, 255, 255, 0.9);
-    border: none;
-    border-radius: 15px;
-    padding: 1.2rem 1.5rem;
-    margin-bottom: 1.2rem;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    background:rgba(255,255,255,0.9); border-radius:15px; padding:1.3rem;
+    margin-bottom:1rem; box-shadow:0 4px 15px rgba(0,0,0,0.1); transition:0.3s;
   }
+  .project-card:hover { transform:translateY(-6px); box-shadow:0 10px 25px rgba(33,150,243,0.4); }
 
-  .project-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 8px 25px rgba(33,150,243,0.3);
-  }
+  .deadline-alert { color:red; font-weight:700; }
+  .deadline-soon { color:#e65100; font-weight:700; }
 
-  .project-title {
-    color: #1976d2;
-    font-weight: 700;
-  }
-
-  .project-description {
-    color: #555;
-    font-size: 0.95rem;
-  }
-
-  /* 🌟 No project alert */
-  .alert-custom {
-    background: linear-gradient(90deg, #ffcc80, #ffb74d);
-    border: none;
-    color: #333;
-    font-weight: 500;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    border-radius: 10px;
-  }
-
-  /* ✨ Add Project button */
-  .btn-add {
-    display: inline-block;
-    background: linear-gradient(45deg, #42a5f5, #26c6da);
-    color: #fff !important;
-    border: none;
-    border-radius: 10px;
-    padding: 10px 20px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-  }
-
-  .btn-add:hover {
-    background: linear-gradient(45deg, #1e88e5, #0097a7);
-    box-shadow: 0 0 15px rgba(33,150,243,0.5);
-    transform: scale(1.05);
-  }
-
-  /* 💫 Icon before title */
-  .page-header i {
-    color: #26c6da;
-  }
 </style>
 
 <div class="projects-container container">
+
   <h2 class="page-header">Your Projects</h2>
 
+  <!-- 🔍 SEARCH + FILTER + SORT -->
+  <div class="filter-box">
+    <form method="GET" class="row g-2">
+
+      <div class="col-md-3">
+        <input type="text" name="q" placeholder="Search…" value="{{ request.GET.q }}" class="form-control">
+      </div>
+
+      <div class="col-md-2">
+        <select name="priority" class="form-control">
+          <option value="">Priority</option>
+          <option value="High" {% if request.GET.priority == "High" %}selected{% endif %}>High</option>
+          <option value="Medium" {% if request.GET.priority == "Medium" %}selected{% endif %}>Medium</option>
+          <option value="Low" {% if request.GET.priority == "Low" %}selected{% endif %}>Low</option>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <select name="status" class="form-control">
+          <option value="">Status</option>
+          <option value="Pending" {% if request.GET.status == "Pending" %}selected{% endif %}>Pending</option>
+          <option value="In Progress" {% if request.GET.status == "In Progress" %}selected{% endif %}>In Progress</option>
+          <option value="Completed" {% if request.GET.status == "Completed" %}selected{% endif %}>Completed</option>
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <select name="sort" class="form-control">
+          <option value="">Sort By</option>
+          <option value="name" {% if request.GET.sort == "name" %}selected{% endif %}>Name (A–Z)</option>
+          <option value="-name" {% if request.GET.sort == "-name" %}selected{% endif %}>Name (Z–A)</option>
+          <option value="priority" {% if request.GET.sort == "priority" %}selected{% endif %}>Priority</option>
+          <option value="-assigned_date" {% if request.GET.sort == "-assigned_date" %}selected{% endif %}>Latest Assigned</option>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <button class="btn btn-primary w-100"><i class="bi bi-search"></i> Apply</button>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- PROJECT LIST -->
   {% if projects %}
-    <div class="row justify-content-center">
-      <div class="col-lg-8">
-        {% for project in projects %}
-  <a href="{% url 'projects:project_detail' project.id %}" class="text-decoration-none">
-    <div class="project-card">
-     <h5 class="project-title">
-  {{ project.name }}
-  {% if project.assigned_to and project.assigned_to.id == request.user.id %}
-    <span class="badge bg-info text-dark ms-2">Assigned</span>
-  {% elif project.owner and project.owner.id == request.user.id %}
-    <span class="badge bg-success ms-2">Created</span>
+    {% for project in projects %}
+      <a href="{% if readonly %}{% url 'projects:project_detail_readonly' project.id %}{% else %}{% url 'projects:project_detail' project.id %}{% endif %}"
+         class="text-decoration-none text-dark">
+
+        <div class="project-card">
+
+          <h5 class="fw-bold text-primary">{{ project.name }}</h5>
+          <p class="text-muted">{{ project.description|truncatechars:120 }}</p>
+
+          <!-- Deadline Alerts -->
+          {% if project.delivery_date %}
+            {% now "U" as nowTs %}
+            {% with due=project.delivery_date|date:"U" %}
+              {% if due < nowTs %}
+                <div class="deadline-alert">⚠️ Overdue!</div>
+              {% elif due < nowTs|add:"172800" %}
+                <div class="deadline-soon">⏳ Due Soon</div>
+              {% endif %}
+            {% endwith %}
+          {% endif %}
+
+        </div>
+      </a>
+    {% endfor %}
   {% else %}
-    <span class="badge bg-secondary text-light ms-2">Unassigned</span>
+    <div class="alert alert-warning text-center">No Projects Found</div>
   {% endif %}
-</h5>
 
-
-      <p class="project-description mb-0">
-        {{ project.description|truncatechars:100 }}
-      </p>
-    </div>
-  </a>
-{% endfor %}
-
-      </div>
-    </div>
-  {% else %}
-    <div class="text-center">
-      <div class="alert alert-custom d-inline-block">
-        No projects yet. Start by adding one!
-      </div>
-      <div class="mt-4">
-        <a href="{% url 'projects:project_create' %}" class="btn btn-add">
-          <i class="bi bi-plus-circle me-1"></i> Add New Project
-        </a>
-      </div>
-    </div>
-  {% endif %}
 </div>
 {% endblock %}

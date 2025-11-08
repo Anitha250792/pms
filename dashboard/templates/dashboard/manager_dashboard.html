@@ -47,12 +47,26 @@
   }
 
   /* 📊 Charts */
-  #priorityChart, #statusChart {
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    padding: 10px;
-  }
+  
+  /* 📊 Chart Container Styling */
+/* 📊 Chart Container Styling */
+.chart-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 420px;        /* ⬆️ Increased height for larger charts */
+  width: 100%;
+  position: relative;
+}
+
+/* 🧭 Bigger Canvas Size (for both Donut & Pie/Bar) */
+.chart-container canvas {
+  min-width: 360px;     /* ⬆️ Larger donut/pie size */
+  min-height: 360px;    /* Keeps proportions equal */
+  width: 100%;
+  height: auto;
+}
+
 
   /* 🧠 Functional Requirements Table */
   .functional-table thead {
@@ -124,6 +138,17 @@
     transform: scale(1.05);
     box-shadow: 0 0 10px rgba(66,165,245,0.5);
   }
+
+  @media (max-width: 768px) {
+  .chart-container {
+    height: 320px;
+  }
+  .chart-container canvas {
+    max-width: 280px;
+    max-height: 280px;
+  }
+}
+
 </style>
 
 <!-- 🌟 Manager Dashboard Content -->
@@ -131,6 +156,23 @@
   <h2 class="text-center fw-bold mb-4 dashboard-title">
      Manager Dashboard — Welcome, {{ user.username }}
   </h2>
+
+  <div class="card shadow-sm mb-3">
+  <div class="card-header bg-dark text-white">Team Announcements</div>
+  <div class="card-body">
+    {% for msg in announcements %}
+      <!-- announcements is a list of length 0 or 1 containing the latest message -->
+      <p class="mb-2">
+        <strong>{{ msg.sender.username|default:"HR" }}</strong>:
+        {{ msg.content }}
+      </p>
+      <small class="text-muted">{{ msg.created_at }}</small>
+    {% empty %}
+      <p class="text-muted">No messages yet.</p>
+    {% endfor %}
+  </div>
+</div>
+
 
   <!-- Overview Cards -->
   <div class="row text-center mb-4">
@@ -146,7 +188,7 @@
     <div class="col-md-6 mb-3">
       <div class="card hover-scale">
         <div class="card-body">
-          <h5 class="fw-semibold text-warning"> Total Tasks</h5>
+          <h5 class="fw-semibold text-warning"> Total Modules</h5>
           <h2 class="fw-bold text-warning display-6">{{ tasks_count|default:0 }}</h2>
         </div>
       </div>
@@ -165,26 +207,32 @@
     </div>
   </div>
 
-  <!-- 📊 Charts -->
-  <div class="row mt-4 justify-content-center align-items-stretch">
-    <div class="col-md-6 mb-4 d-flex">
-      <div class="card shadow-sm p-3 flex-fill">
-        <h5 class="text-center text-primary mb-3">Project Priority Overview</h5>
-        <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
-          <canvas id="priorityChart"></canvas>
-        </div>
-      </div>
-    </div>
+ <!-- 📊 Charts Section -->
+<div class="row mt-4 justify-content-center align-items-stretch">
 
-    <div class="col-md-6 mb-4 d-flex">
-      <div class="card shadow-sm p-3 flex-fill">
-        <h5 class="text-center text-success mb-3">Task Status Overview</h5>
-        <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
-          <canvas id="statusChart"></canvas>
-        </div>
+  <!-- 🎯 Project Priority Overview (Donut Chart) -->
+  <div class="col-md-6 mb-4 d-flex justify-content-center align-items-center">
+    <div class="card shadow-sm p-3 flex-fill">
+      <h5 class="text-center text-primary mb-3">Project Priority Overview</h5>
+      <div class="chart-container">
+        <canvas id="priorityChart"></canvas>
       </div>
     </div>
   </div>
+
+  <!-- 📈 Module Status Overview (Pie or Bar Chart) -->
+  <div class="col-md-6 mb-4 d-flex justify-content-center align-items-center">
+    <div class="card shadow-sm p-3 flex-fill">
+      <h5 class="text-center text-success mb-3">Module Status Overview</h5>
+      <div class="chart-container">
+        <canvas id="statusChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
 
   <!-- 🧠 Functional Requirements Table -->
   <hr class="my-5" />
@@ -223,8 +271,7 @@
     </table>
   </div>
 
-  <!-- 🧩 Team Projects Summary -->
-  <!-- 🧩 Team Projects Summary -->
+ <!-- 🧩 Team Projects Summary -->
 <hr class="my-5" />
 <h4 class="fw-bold mb-3 text-center dashboard-heading-white"> Team Projects Summary</h4>
 
@@ -234,6 +281,58 @@
   </a>
 </div>
 
+{% if pending_projects %}
+  <!-- 🔔 Pending Approval Projects (Top Section) -->
+  <h5 class="fw-bold mb-2 text-center text-warning">Pending Approval Projects</h5>
+
+  <div class="table-responsive mb-4">
+    <table class="table table-hover table-bordered align-middle shadow-sm team-table">
+      <thead class="text-center">
+        <tr>
+          <th>Project</th>
+          <th>Requested By</th>
+          <th>Status</th>
+          <th>Priority</th>
+          <th>Completion</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for project in pending_projects %}
+        <tr>
+          <td class="fw-semibold">{{ project.name }}</td>
+          <td>
+            {{ project.assigned_to.username|default:"N/A" }}
+          </td>
+          <td class="text-center">
+            <span class="badge bg-warning text-dark">Pending Approval</span>
+          </td>
+          <td class="text-center">
+            {% if project.priority == "High" %}
+              <span class="badge bg-danger">High</span>
+            {% elif project.priority == "Medium" %}
+              <span class="badge bg-warning text-dark">Medium</span>
+            {% else %}
+              <span class="badge bg-success">Low</span>
+            {% endif %}
+          </td>
+          <td style="min-width: 160px;">
+            <div class="progress" style="height: 20px;">
+              <div class="progress-bar fw-bold"
+                   role="progressbar"
+                   style="width: {{ project.completion|default:0 }}%;
+                          background: {{ project.progress_color }};">
+                {{ project.completion|default:0 }}%
+              </div>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+
+<!-- ✅ All Other (Active / In Progress / Completed / On Hold) Projects -->
 <div class="table-responsive">
   <table class="table table-hover table-bordered align-middle shadow-sm team-table">
     <thead class="text-center">
@@ -291,42 +390,45 @@
 
         <!-- ✅ Assign Project -->
         <td>
-  {% if user_role == "Manager" %}
-    <select class="form-select assign-dropdown" data-project-id="{{ project.id }}">
-      <option value="">-- Assign To --</option>
-      {% for member in team_summary %}
-        <option value="{{ member.id }}"
-          {% if project.assigned_to and project.assigned_to.id == member.id %}
-            selected
+          {% if user_role == "Manager" %}
+            <select class="form-select assign-dropdown" data-project-id="{{ project.id }}">
+              <option value="">-- Assign To --</option>
+              {% for member in team_summary %}
+                <option value="{{ member.id }}"
+                  {% if project.assigned_to and project.assigned_to.id == member.id %}
+                    selected
+                  {% endif %}
+                >
+                  {{ member.username }}
+                </option>
+              {% endfor %}
+            </select>
+          {% else %}
+            {% if project.assigned_to %}
+              {{ project.assigned_to.username }}
+            {% else %}
+              Unassigned
+            {% endif %}
           {% endif %}
-        >
-          {{ member.username }}
-        </option>
-      {% endfor %}
-    </select>
-  {% else %}
-    {% if project.assigned_to %}
-      {{ project.assigned_to.username }}
-    {% else %}
-      Unassigned
-    {% endif %}
-  {% endif %}
-</td>
-
+        </td>
 
         <!-- View Dashboard -->
-<td class="text-center">
-  {% if project.assigned_to %}
-    <a href="{% url 'dashboard:member_dashboard' project.assigned_to.id %}"
-       class="btn btn-sm btn-outline-primary fw-semibold">
-      View {{ project.assigned_to.username }}'s Dashboard
-    </a>
-  {% else %}
-    <button class="btn btn-sm btn-secondary fw-semibold" disabled title="No team member assigned">
-      Not Assigned
+        <td class="text-center">
+          {% if project.assigned_to.exists %}
+    {% for member in project.assigned_to.all %}
+        <a href="{% url 'dashboard:member_dashboard' member.id %}"
+           class="btn btn-sm btn-outline-primary fw-semibold mb-1 w-100">
+            View {{ member.username }}'s Dashboard
+        </a>
+    {% endfor %}
+{% else %}
+    <button class="btn btn-sm btn-secondary fw-semibold" disabled>
+        Not Assigned
     </button>
-  {% endif %}
-</td>
+{% endif %}
+
+
+        </td>
 
       </tr>
       {% empty %}
@@ -339,6 +441,7 @@
 
 <!-- ✅ Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
   const priorityData = {{ project_priority_data|default:"[]"|safe }};
   const statusData = {{ task_status_data|default:"[]"|safe }};
@@ -392,5 +495,35 @@
       plugins: { legend: { display: false } }
     }
   });
+
+  function showSuccess(msg) {
+    Swal.fire({
+        toast: true,
+        position: "top-end",
+        icon: "success",
+        title: msg,
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+    });
+}
+
+document.querySelectorAll(".assign-dropdown").forEach(select => {
+    select.addEventListener("change", function () {
+        const projectId = this.dataset.projectId;
+        const memberId = this.value;
+
+        fetch(`/projects/${projectId}/assign/${memberId}/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+            },
+        }).then(res => {
+            if (res.ok) {
+                showSuccess("Member Assigned Successfully!");
+            }
+        });
+    });
+});
 </script>
 {% endblock %}

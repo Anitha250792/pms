@@ -98,15 +98,10 @@
     {% if form.instance.pk %}
       Edit Module
     {% else %}
-      Add Task
+      Add Module
     {% endif %}
   </h3>
 
-  {% if messages %}
-    {% for message in messages %}
-      <div class="alert alert-{{ message.tags }} text-center">{{ message }}</div>
-    {% endfor %}
-  {% endif %}
 
   <form method="POST">
     {% csrf_token %}

@@ -1,10 +1,8 @@
 {% extends 'base.html' %}
-
 {% block title %} Create New Project{% endblock %}
 
 {% block content %}
 <style>
-  /* 🎨 Page-specific background accent */
   body::after {
     background: linear-gradient(-45deg,
       rgba(66, 165, 245, 0.2),
@@ -15,7 +13,6 @@
     animation: gradientShift 10s ease infinite;
   }
 
-  /* 🌸 Centered Card */
   .project-card {
     backdrop-filter: blur(18px);
     background: rgba(255, 255, 255, 0.9);
@@ -32,7 +29,6 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* 🏷️ Form elements */
   .project-card label {
     font-weight: 600;
     color: #333;
@@ -54,7 +50,6 @@
     box-shadow: 0 0 10px rgba(66, 165, 245, 0.4);
   }
 
-  /* 🌈 Gradient button */
   .btn-create {
     background: linear-gradient(45deg, #42a5f5, #26c6da);
     color: #fff;
@@ -71,7 +66,6 @@
     transform: scale(1.05);
   }
 
-  /* 💫 Header Styling */
   .page-title {
     text-align: center;
     font-weight: 700;
@@ -80,13 +74,15 @@
     margin-bottom: 1.5rem;
   }
 
-  /* 🪶 Floating animation */
-  .project-card {
-    transition: transform 0.3s ease;
-  }
-
   .project-card:hover {
     transform: translateY(-5px);
+  }
+
+  /* ❗ Error styles */
+  .errorlist {
+    color: #d32f2f;
+    margin-top: 5px;
+    font-size: 0.9rem;
   }
 </style>
 
@@ -94,61 +90,63 @@
   <div class="project-card shadow-lg">
     <h2 class="page-title">Add New Project</h2>
 
-    {% if messages %}
-      {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} text-center">{{ message }}</div>
-      {% endfor %}
-    {% endif %}
-
-    <form method="POST">
+    <!-- ✅ Add enctype and show errors -->
+    <form method="POST" enctype="multipart/form-data" novalidate>
       {% csrf_token %}
+      {{ form.non_field_errors }}
+
       <div class="row g-3">
-  <div class="col-md-6">
-    <label class="form-label" for="id_name">Project Name</label>
-    {{ form.name }}
-  </div>
+        <div class="col-md-6">
+          <label class="form-label" for="id_name">Project Name</label>
+          {{ form.name }}
+          {{ form.name.errors }}
+        </div>
 
-  {% if user.role == "Manager" %}
-  <div class="col-md-6">
-    <label class="form-label" for="id_assigned_to">Assign To</label>
-    {{ form.assigned_to }}
-  </div>
-  {% endif %}
+        {% if request.user.role == "Manager" %}
+        <div class="col-md-6">
+          <label class="form-label" for="id_assigned_to">Assign To</label>
+          {{ form.assigned_to }}
+          {{ form.assigned_to.errors }}
+        </div>
+        {% endif %}
 
-  <div class="col-md-12">
-    <label class="form-label" for="id_description">Description</label>
-    {{ form.description }}
-  </div>
+        <div class="col-md-12">
+          <label class="form-label" for="id_description">Description</label>
+          {{ form.description }}
+          {{ form.description.errors }}
+        </div>
 
-  <div class="col-md-6">
-    <label class="form-label" for="id_assigned_date">Assigned Date</label>
-    {{ form.assigned_date }}
-  </div>
+        <div class="col-md-6">
+          <label class="form-label" for="id_assigned_date">Assigned Date</label>
+          {{ form.assigned_date }}
+          {{ form.assigned_date.errors }}
+        </div>
 
-  <div class="col-md-6">
-    <label class="form-label" for="id_delivery_date">Delivery Date</label>
-    {{ form.delivery_date }}
-  </div>
+        <div class="col-md-6">
+          <label class="form-label" for="id_delivery_date">Delivery Date</label>
+          {{ form.delivery_date }}
+          {{ form.delivery_date.errors }}
+        </div>
 
-  <div class="col-md-6">
-    <label class="form-label" for="id_status">Status</label>
-    {{ form.status }}
-  </div>
+        <div class="col-md-6">
+          <label class="form-label" for="id_status">Status</label>
+          {{ form.status }}
+          {{ form.status.errors }}
+        </div>
 
-  <div class="col-md-6">
-    <label class="form-label" for="id_priority">Priority</label>
-    {{ form.priority }}
-  </div>
-</div>
-
+        <div class="col-md-6">
+          <label class="form-label" for="id_priority">Priority</label>
+          {{ form.priority }}
+          {{ form.priority.errors }}
+        </div>
+      </div>
 
       <div class="text-center mt-4">
         <button type="submit" class="btn btn-create px-4">
-          <i class="bi bi-plus-circle me-1"></i>  Project
+          <i class="bi bi-plus-circle me-1"></i> Project
         </button>
       </div>
     </form>
   </div>
 </div>
-
 {% endblock %}

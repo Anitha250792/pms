@@ -15,8 +15,9 @@
     backdrop-filter: blur(12px);
     background: rgba(255, 255, 255, 0.95);
     border-radius: 20px;
-    box-shadow: 0 0 25px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 25px rgba(0,0,0,0.2);
     animation: fadeInUp 1s ease;
+    color: #000;
   }
 
   .project-title {
@@ -34,276 +35,193 @@
   }
 
   .list-group-item {
+    background: rgba(240,248,255,0.8);
     border: none;
-    background: rgba(240, 248, 255, 0.8);
     border-radius: 12px !important;
-    margin-bottom: 8px;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    margin-bottom: 10px;
   }
 
   .progress {
     height: 25px;
     border-radius: 15px;
     overflow: hidden;
-    background: rgba(230, 230, 230, 0.6);
   }
 
   .progress-bar {
-    transition: width 1.2s ease-in-out;
     font-weight: bold;
     color: #fff;
+    transition: width 1.2s ease-in-out;
   }
 
   .btn-save {
-    background: linear-gradient(45deg, #26c6da, #42a5f5);
-    color: #fff !important;
+    background: linear-gradient(45deg,#26c6da,#42a5f5);
+    color: white !important;
     border: none;
-    border-radius: 8px;
     padding: 6px 12px;
     font-weight: 600;
-    transition: 0.3s;
+    border-radius: 8px;
   }
-
-  .btn-save:hover { background: linear-gradient(45deg, #0097a7, #1e88e5); transform: scale(1.05); }
 
   .btn-delete {
     background: #e53935;
     color: white !important;
-    border: none;
-    border-radius: 8px;
     padding: 6px 10px;
     font-weight: 600;
-    transition: 0.3s;
-  }
-
-  .btn-delete:hover { background: #c62828; transform: scale(1.05); }
-
-  .btn-back {
-    background: linear-gradient(45deg, #66bb6a, #43a047);
-    color: white !important;
-    border: none;
-    font-weight: 600;
     border-radius: 8px;
-    padding: 8px 16px;
-    transition: 0.3s;
   }
 
-  .btn-back:hover { background: linear-gradient(45deg, #2e7d32, #43a047); transform: scale(1.05); }
-
-  .gallery-image { transition: transform 0.3s ease; cursor: pointer; }
-  .gallery-image:hover { transform: scale(1.05); }
+  .gallery-image {
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  .gallery-image:hover {
+    transform: scale(1.05);
+  }
 
   #lightbox {
     display: none;
     position: fixed;
-    z-index: 1050;
-    left: 0; top: 0;
-    width: 100%; height: 100%;
-    background-color: rgba(0,0,0,0.8);
-    align-items: center; justify-content: center;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
   }
-  #lightbox img { max-width: 90%; max-height: 80%; border-radius: 10px; box-shadow: 0 0 25px rgba(255,255,255,0.3); }
-
-  #toastMessage {
-    display: none; position: fixed; top: 25px; right: 25px;
-    min-width: 250px; padding: 14px 20px; border-radius: 10px;
-    font-weight: 600; color: #fff; z-index: 9999;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.25);
-    opacity: 0; transform: translateY(-10px);
-    transition: opacity 0.5s ease, transform 0.4s ease;
+  #lightbox img {
+    max-width: 90%;
+    max-height: 80%;
   }
-  #toastMessage.show { display: block; opacity: 1; transform: translateY(0); }
-  .toast-success { background: linear-gradient(45deg, #43a047, #66bb6a); }
-  .toast-error { background: linear-gradient(45deg, #e53935, #f4511e); }
 </style>
 
-<div class="project-detail-container shadow-lg">
+<div class="project-detail-container">
+
   <h2 class="project-title">{{ project.name }}</h2>
   <p class="project-description">{{ project.description }}</p>
 
-  <hr class="mb-4">
+  <hr>
 
-  <h5 class="text-primary mb-3"><i class="bi bi-info-circle me-2"></i>Project Details</h5>
+  <h5 class="text-primary fw-bold mb-2">📌 Project Information</h5>
+
   <ul class="list-group mb-4">
     <li class="list-group-item"><strong>Assigned Date:</strong> {{ project.assigned_date|date:"M d, Y" }}</li>
     <li class="list-group-item"><strong>Delivery Date:</strong> {{ project.delivery_date|date:"M d, Y" }}</li>
     <li class="list-group-item"><strong>Assigned To:</strong> {{ project.assigned_to.username|default:"Not Assigned" }}</li>
   </ul>
 
-  <!-- ✅ Status + Completion -->
-  <div class="list-group-item edit-row mb-3">
-    <div><strong>Status:</strong></div>
+  <!-- STATUS -->
+  <div class="list-group-item mb-3">
+    <strong>Status:</strong>
     <form id="statusForm">
       {% csrf_token %}
-      <select name="status" id="statusSelect" {% if request.user.role == "Manager" %}disabled{% endif %}>
+      <select name="status">
         <option value="Pending" {% if project.status == "Pending" %}selected{% endif %}>Pending</option>
         <option value="In Progress" {% if project.status == "In Progress" %}selected{% endif %}>In Progress</option>
         <option value="Completed" {% if project.status == "Completed" %}selected{% endif %}>Completed</option>
         <option value="On Hold" {% if project.status == "On Hold" %}selected{% endif %}>On Hold</option>
       </select>
-      {% if request.user.role != "Manager" %}
-      <button type="submit" class="btn-save">Save</button>
+      {% if request.user.role not in "HR Manager" %}
+      <button class="btn-save">Save</button>
       {% endif %}
     </form>
   </div>
 
-  <div class="list-group-item edit-row mb-4">
-    <div><strong>Completion:</strong></div>
+  <!-- REMARKS (Team Member Only) -->
+  {% if request.user.role not in "HR Manager" %}
+  <div class="list-group-item mb-4">
+    <form method="POST">
+      {% csrf_token %}
+      <label class="fw-bold">Remarks:</label>
+      <textarea name="remark" rows="3" class="form-control">{{ project.remark }}</textarea>
+      <button class="btn btn-primary mt-2">Update</button>
+    </form>
+  </div>
+  {% endif %}
+
+  <!-- COMPLETION -->
+  <div class="list-group-item mb-3">
+    <strong>Completion:</strong>
     <form id="completionForm">
       {% csrf_token %}
-      <input type="number" name="completion" id="completionInput" min="0" max="100"
-             value="{{ project.completion|default:0 }}" required {% if request.user.role == "Manager" %}disabled{% endif %}>%
-      {% if request.user.role != "Manager" %}
-      <button type="submit" class="btn-save">Save</button>
+      <input type="number" name="completion" min="0" max="100" value="{{ project.completion }}">
+      {% if request.user.role not in "HR Manager" %}
+      <button class="btn-save">Save</button>
       {% endif %}
     </form>
   </div>
 
-  <div class="progress mb-5">
-    <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated"
-         style="width: {{ project.completion|default:0 }}%;
-                background: {% if project.completion < 40 %}#e53935
-                             {% elif project.completion < 70 %}#fbc02d
-                             {% else %}#43a047{% endif %};">
-      {{ project.completion|default:0 }}%
+  <div class="progress mb-4">
+    <div id="progressBar"
+         class="progress-bar"
+         style="width: {{ project.completion }}%;
+                background:{% if project.completion < 40 %}#e53935{% elif project.completion < 70 %}#fbc02d{% else %}#43a047{% endif %}">
+      {{ project.completion }}%
     </div>
   </div>
 
-  <!-- 🌟 Gallery -->
+  <!-- IMAGES -->
   <hr class="my-4">
-  <h5 class="text-primary mb-3"><i class="bi bi-images me-2"></i>Project Gallery</h5>
+  <h5 class="text-primary mb-3"><i class="bi bi-images"></i> Project Images</h5>
+
   {% if images %}
   <div class="row g-3">
     {% for img in images %}
-      <div class="col-md-4 text-center">
-        <div class="card shadow-sm position-relative">
-          <img src="{{ img.image.url }}" class="card-img-top rounded gallery-image" alt="Project Image">
-          <div class="card-footer small text-muted">
-            Uploaded by: {{ img.uploaded_by.username|default:"Unknown" }}
-          </div>
-          {% if request.user.role != "Manager" %}
-            <form method="POST" action="{% url 'projects:delete_project_image' img.id %}"
-                  style="position:absolute;top:8px;right:8px;">
-              {% csrf_token %}
-              <button type="submit" class="btn-delete btn-sm"><i class="bi bi-trash"></i></button>
-            </form>
-          {% endif %}
-        </div>
-      </div>
+    <div class="col-md-4 text-center">
+      <img src="{{ img.image.url }}" class="img-fluid rounded gallery-image">
+      {% if request.user.role not in "HR Manager" %}
+      <form action="{% url 'projects:delete_project_image' img.id %}" method="POST" class="mt-1">
+        {% csrf_token %}
+        <button class="btn-delete btn-sm"><i class="bi bi-trash"></i></button>
+      </form>
+      {% endif %}
+    </div>
     {% endfor %}
   </div>
   {% else %}
-    <p class="text-muted">No images uploaded yet.</p>
+  <p class="text-muted">No images uploaded yet.</p>
   {% endif %}
 
-  {% if request.user.role != "Manager" %}
-  <hr class="my-4">
-  <h5 class="text-primary mb-3"><i class="bi bi-upload me-2"></i>Upload Project Images</h5>
+  {% if request.user.role not in "HR Manager" %}
+  <hr>
   <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="btn btn-save mt-2">Upload</button>
+    <button class="btn-save">Upload</button>
   </form>
   {% endif %}
 
-  <!-- 🌐 Live Link -->
-  <hr class="my-4">
+  <!-- LIVE LINK -->
   {% if project.live_link %}
-    <div class="text-center">
-      <a href="{{ project.live_link }}" target="_blank" class="btn btn-info fw-bold">
-        🌐 View Live Project
-      </a>
-    </div>
-  {% endif %}
-
-  {% if request.user.role != "Manager" %}
-    <div class="mt-4">
-      <form method="POST" action="">
-        {% csrf_token %}
-        <label class="fw-bold text-primary">Add or Update Live Project Link:</label>
-        <input type="url" name="live_link" class="form-control" placeholder="https://example.com" required>
-        <button type="submit" class="btn btn-save mt-2">Save Link</button>
-      </form>
-    </div>
-  {% endif %}
-
-  <div class="text-center mt-5">
-    <a href="{% url 'projects:project_list' %}" class="btn btn-back">← Back to Projects</a>
+  <div class="text-center mt-4">
+    <a href="{{ project.live_link }}" target="_blank" class="btn btn-info">🌐 View Live Project</a>
   </div>
+  {% endif %}
+
+  {% if request.user.role not in "HR Manager" %}
+  <form method="POST" class="mt-3">
+    {% csrf_token %}
+    <label class="fw-bold">Live Link:</label>
+    <input type="url" name="live_link" class="form-control" value="{{ project.live_link }}">
+    <button class="btn-save mt-2">Save</button>
+  </form>
+  {% endif %}
+
+  <div class="text-center mt-4">
+    <a href="{% url 'projects:project_list' %}" class="btn btn-secondary">← Back</a>
+  </div>
+
 </div>
 
-<!-- Lightbox -->
-<div id="lightbox"><img src="" alt="Preview"></div>
-<div id="toastMessage"></div>
+<!-- LIGHTBOX -->
+<div id="lightbox"><img src=""></div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-  const progressBar = document.getElementById("progressBar");
-  const lightbox = document.getElementById("lightbox");
-  const lightboxImg = lightbox.querySelector("img");
-
-  // Lightbox
-  document.querySelectorAll(".gallery-image").forEach(img => {
-    img.addEventListener("click", () => {
-      lightboxImg.src = img.src;
-      lightbox.style.display = "flex";
-    });
-  });
-  lightbox.addEventListener("click", () => (lightbox.style.display = "none"));
+document.querySelectorAll(".gallery-image").forEach(img => {
+  img.onclick = () => {
+    document.querySelector("#lightbox img").src = img.src;
+    document.getElementById("lightbox").style.display = "flex";
+  };
 });
-
-{% if request.user.role != "Manager" %}
-document.addEventListener("DOMContentLoaded", function() {
-  const progressBar = document.getElementById("progressBar");
-
-  function showToast(message, type = "success") {
-    const toast = document.getElementById("toastMessage");
-    toast.className = "";
-    toast.textContent = message;
-    toast.classList.add("show", type === "success" ? "toast-success" : "toast-error");
-    setTimeout(() => { toast.classList.remove("show"); }, 2000);
-  }
-
-  function getCSRFToken() {
-    return document.querySelector('[name=csrfmiddlewaretoken]').value;
-  }
-
-  // Update Status
-  const statusForm = document.getElementById("statusForm");
-  statusForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const data = new FormData(statusForm);
-    const res = await fetch("{% url 'projects:update_status_ajax' project.id %}", {
-      method: "POST",
-      headers: { "X-CSRFToken": getCSRFToken() },
-      body: data,
-    });
-    const result = await res.json();
-    if (result.success) showToast("✅ Status updated successfully!");
-  });
-
-  // Update Completion
-  const completionForm = document.getElementById("completionForm");
-  completionForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const data = new FormData(completionForm);
-    const val = data.get("completion");
-    const res = await fetch("{% url 'projects:update_completion_ajax' project.id %}", {
-      method: "POST",
-      headers: { "X-CSRFToken": getCSRFToken() },
-      body: data,
-    });
-    const result = await res.json();
-    if (result.success) {
-      progressBar.style.width = val + "%";
-      progressBar.textContent = val + "%";
-      progressBar.style.background =
-        val < 40 ? "#e53935" : val < 70 ? "#fbc02d" : "#43a047";
-      showToast("✅ Completion updated successfully!");
-    }
-  });
-});
-{% endif %}
+document.getElementById("lightbox").onclick = () =>
+  (document.getElementById("lightbox").style.display = "none");
 </script>
 {% endblock %}

@@ -26,36 +26,31 @@ def register_view(request):
 
 # 🟦 LOGIN VIEW
 def login_view(request):
-    """Handles user login with namespace-safe redirection."""
-    form = AuthenticationForm(request, data=request.POST or None)
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
 
-    if request.method == 'POST' and form.is_valid():
-        username = form.cleaned_data.get('username')
-        password = form.cleaned_data.get('password')
         user = authenticate(request, username=username, password=password)
 
-        if user is not None:
+        if user:
             login(request, user)
-            messages.success(request, f"🎉 Welcome, {user.username}!")
 
-            # ✅ If ?next=/dashboard/, redirect there first
-            next_url = request.GET.get('next')
-            if next_url:
-                return redirect(next_url)
+            # Redirect based on role
+            if user.role == "HR":
+                return redirect("dashboard:hr_dashboard")
 
-            # ✅ Safe redirect to Dashboard (works even if namespace changes)
-            try:
-                return redirect(reverse('dashboard:dashboard'))
-            except NoReverseMatch:
-                # Fallback in case namespace not loaded yet
-                return redirect('/dashboard/')
+            elif user.role == "Manager":
+                return redirect("dashboard:dashboard")
 
+            elif user.role == "Team Member":
+                return redirect("dashboard:dashboard")
+
+            # default fallback
+            return redirect("dashboard:dashboard")
         else:
-            messages.error(request, "Invalid username or password.")
-    elif request.method == 'POST':
-        messages.error(request, "Invalid credentials. Please try again.")
+            messages.error(request, "Invalid username or password")
 
-    return render(request, 'accounts/login.html', {'form': form})
+    return render(request, "accounts/login.html")
 
 
 # 🟥 LOGOUT VIEW
