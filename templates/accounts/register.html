@@ -73,101 +73,107 @@
     transform: scale(1.05);
   }
    form {
-    width: 100%;
-    padding: 10px 25px;
-  }
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
 
-  /* Use grid for two-column layout */
-  form .form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.2rem 1.5rem; /* row-gap column-gap */
-  }
+/* 🏷️ Labels */
+.form-label {
+  display: block;
+  font-weight: 600;
+  color: #2f3e46;
+  margin-bottom: 6px;
+}
 
-  /* Make specific fields full-width */
-  .form-grid .full-width {
-    grid-column: 1 / -1;
-  }
+/* ✏️ Inputs */
+.form-control {
+  width: 100%;
+  height: 45px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  padding-left: 12px;
+  font-size: 0.95rem;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+}
 
-  /* 🏷️ Label */
-  .form-label {
-    display: block;
-    font-weight: 600;
-    color: #2f3e46;
-    margin-bottom: 6px;
-    font-size: 0.95rem;
-  }
+.form-control:focus {
+  border-color: #26a69a;
+  box-shadow: 0 0 0 0.15rem rgba(38, 166, 154, 0.25);
+  outline: none;
+}
 
-  /* ✏️ Input fields */
+/* 👁️ Input groups (for password fields) */
+.input-group {
+  display: flex;
+  align-items: center;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.input-group .form-control {
+  border-right: none;
+  border-radius: 10px 0 0 10px;
+}
+
+.input-group-text {
+  background-color: #f9f9f9;
+  border-left: none;
+  cursor: pointer;
+  border-radius: 0 10px 10px 0;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+}
+
+/* ⚠️ Error text */
+.text-danger.small {
+  margin-top: 4px;
+  font-size: 0.85rem;
+}
+
+/* 🔘 Button alignment */
+.d-grid {
+  display: flex;
+  justify-content: center;
+}
+
+.btn-register {
+  width: 100%;
+  border-radius: 10px;
+  padding: 10px 0;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  background: linear-gradient(45deg, #26a69a, #66bb6a);
+  color: #fff;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn-register:hover {
+  background: linear-gradient(45deg, #43a047, #81c784);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+/* 🧾 Form spacing */
+form .mb-3 {
+  margin-bottom: 1.2rem !important;
+}
+
+/* 📱 Responsive adjustments */
+@media (max-width: 576px) {
   .form-control {
-    width: 100%;
-    height: 45px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    padding: 8px 12px;
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    height: 42px;
   }
 
-  .form-control:focus {
-    border-color: #26a69a;
-    box-shadow: 0 0 0 0.15rem rgba(38, 166, 154, 0.25);
-    outline: none;
-  }
-
-  /* 👁️ Password input-group */
-  .input-group {
-    display: flex;
-    align-items: center;
-  }
-
-  .input-group .form-control {
-    border-right: none;
-    border-radius: 8px 0 0 8px;
-  }
-
-  .input-group-text {
-    border-radius: 0 8px 8px 0;
-    background-color: #f9f9f9;
-    border-left: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    padding: 0 12px;
-  }
-
-  /* ⚠️ Error messages */
-  .text-danger.small {
-    font-size: 0.85rem;
-    margin-top: 4px;
-  }
-
-  /* 🔘 Submit button */
   .btn-register {
-    width: 100%;
-    border-radius: 10px;
-    padding: 11px 0;
-    font-weight: 600;
-    background: linear-gradient(45deg, #26a69a, #66bb6a);
-    color: #fff;
-    font-size: 1rem;
-    letter-spacing: 0.4px;
-    border: none;
-    transition: all 0.3s ease;
+    font-size: 0.95rem;
   }
-
-  .btn-register:hover {
-    background: linear-gradient(45deg, #43a047, #81c784);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(76, 175, 80, 0.35);
-  }
-
-  /* 📱 Responsive layout (stack form fields on small screens) */
-  @media (max-width: 768px) {
-    form .form-grid {
-      grid-template-columns: 1fr;
-    }
-  }
+}
   </style>
 
 <!-- 🌟 Centered Register Card -->
