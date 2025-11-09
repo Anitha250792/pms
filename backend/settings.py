@@ -8,23 +8,29 @@ from pathlib import Path
 import os
 import dj_database_url
 import pymysql
-pymysql.install_as_MySQLdb()
-
-RENDER_EXTERNAL_HOSTNAME = os.getenv('RENDER_EXTERNAL_HOSTNAME')
-if RENDER_EXTERNAL_HOSTNAME:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 # --------------------------------------------------------
 # BASE CONFIGURATION
 # --------------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+pymysql.install_as_MySQLdb()
+
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-change-this-to-a-secure-key')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
+# --------------------------------------------------------
+# HOST CONFIGURATION (Dynamic for Render)
+# --------------------------------------------------------
+# Base hosts for local development
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
+# Dynamically add Render hostname if available
+RENDER_EXTERNAL_HOSTNAME = os.getenv('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
+# CSRF trusted origins (include Render dynamically)
 CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:8000',
     'http://localhost:8000',
@@ -32,6 +38,7 @@ CSRF_TRUSTED_ORIGINS = [
 
 if RENDER_EXTERNAL_HOSTNAME:
     CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_EXTERNAL_HOSTNAME}")
+
 # --------------------------------------------------------
 # APPLICATIONS
 # --------------------------------------------------------
@@ -57,6 +64,7 @@ INSTALLED_APPS = [
 # --------------------------------------------------------
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # ✅ Recommended for static files on Render
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -88,7 +96,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-
 # --------------------------------------------------------
 # DATABASE (Dual: MySQL local + PostgreSQL on Render)
 # --------------------------------------------------------
@@ -110,7 +117,6 @@ else:  # ✅ Local development (MySQL)
             },
         }
     }
-
 
 # --------------------------------------------------------
 # PASSWORD VALIDATION
@@ -144,24 +150,26 @@ USE_TZ = True
 # --------------------------------------------------------
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # ✅ For Render
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Enable WhiteNoise for serving static files efficiently
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # --------------------------------------------------------
 # SECURITY & PERFORMANCE (for deployment)
 # --------------------------------------------------------
 SESSION_COOKIE_AGE = 3600  # 1 hour
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # --------------------------------------------------------
-# EMAIL CONFIGURATION (for notifications)
+# EMAIL CONFIGURATION
 # --------------------------------------------------------
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-# For production, switch to SMTP when ready
+# For production:
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 # EMAIL_HOST = 'smtp.gmail.com'
 # EMAIL_PORT = 587
