@@ -1,8 +1,12 @@
+"""
+Django settings for Productivity Project Management System
+Author: Ani
+"""
+
 from pathlib import Path
 import os
 import dj_database_url
 import pymysql
-
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -11,10 +15,14 @@ pymysql.install_as_MySQLdb()
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-change-this-to-a-secure-key")
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
-
+# --------------------------------------------------------
 # HOST CONFIGURATION
 # --------------------------------------------------------
-ALLOWED_HOSTS = ["127.0.0.1", "localhost", "pms-t7l8.onrender.com"]
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "localhost",
+    "pms-t7l8.onrender.com",
+]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8000",
@@ -27,11 +35,11 @@ if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
     CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_EXTERNAL_HOSTNAME}")
 
-
 # --------------------------------------------------------
 # APPLICATIONS
 # --------------------------------------------------------
 INSTALLED_APPS = [
+    # Django Core
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -41,26 +49,32 @@ INSTALLED_APPS = [
     "django_extensions",
     "django.contrib.sites",
 
+    # Allauth
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
 
+    # Project Apps
     "accounts",
     "projects",
     "tasks",
     "dashboard",
-    "channels",
     "communications",
     "design",
     "notifications",
+
+    # WebSocket Channels
+    "channels",
 ]
 
 SITE_ID = 1
 
 # --------------------------------------------------------
-# AUTHENTICATION
+# AUTH & USER MODEL
 # --------------------------------------------------------
+AUTH_USER_MODEL = "accounts.CustomUser"
+
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
@@ -71,9 +85,9 @@ LOGOUT_REDIRECT_URL = "/user/login/"
 LOGIN_REDIRECT_URL = "/dashboard/global/"
 ACCOUNT_SIGNUP_REDIRECT_URL = "/dashboard/"
 
-ACCOUNT_SIGNUP_FIELDS = ["email", "username", "password1", "password2"]
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_SIGNUP_FIELDS = ["email", "username", "password1", "password2"]
 ACCOUNT_LOGIN_METHODS = {"username", "email"}
 
 SOCIALACCOUNT_LOGIN_ON_GET = True
@@ -94,7 +108,6 @@ SOCIALACCOUNT_PROVIDERS = {
 # CHANNELS
 # --------------------------------------------------------
 ASGI_APPLICATION = "backend.asgi.application"
-
 CHANNEL_LAYERS = {
     "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
 }
@@ -127,8 +140,8 @@ TEMPLATES = [
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.debug",
-                "django.contrib.auth.context_processors.auth",
                 "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
             ],
         },
@@ -138,9 +151,9 @@ TEMPLATES = [
 WSGI_APPLICATION = "backend.wsgi.application"
 
 # --------------------------------------------------------
-# DATABASE
+# DATABASE (MySQL Local / PostgreSQL Render)
 # --------------------------------------------------------
-if os.getenv("RENDER"):
+if os.getenv("RENDER"):  # When deployed on Render
     DATABASES = {
         "default": dj_database_url.config(default=os.getenv("DATABASE_URL"))
     }
@@ -153,6 +166,9 @@ else:
             "PASSWORD": "root",
             "HOST": "localhost",
             "PORT": "3306",
+            "OPTIONS": {
+                "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
+            },
         }
     }
 
@@ -165,8 +181,6 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
-
-AUTH_USER_MODEL = "accounts.CustomUser"
 
 # --------------------------------------------------------
 # INTERNATIONALIZATION
@@ -191,3 +205,6 @@ MEDIA_ROOT = BASE_DIR / "media"
 # EMAIL
 # --------------------------------------------------------
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+# --------------------------------------------------------
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
