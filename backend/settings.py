@@ -1,4 +1,3 @@
-
 from pathlib import Path
 import os
 import dj_database_url
@@ -15,30 +14,17 @@ DEBUG = os.getenv("DEBUG", "True") == "True"
 
 # HOST CONFIGURATION
 # --------------------------------------------------------
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
-
-RENDER_EXTERNAL_HOSTNAME = os.getenv("RENDER_EXTERNAL_HOSTNAME")
-if RENDER_EXTERNAL_HOSTNAME:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "pms-t7l8.onrender.com"]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8000",
     "http://localhost:8000",
+    "https://pms-t7l8.onrender.com",
 ]
 
-ALLOWED_HOSTS = [
-    '127.0.0.1',
-    'localhost',
-    'pms-t7l8.onrender.com',      # ✅ your Render domain
-]
-
-CSRF_TRUSTED_ORIGINS = [
-    'http://127.0.0.1:8000',
-    'http://localhost:8000',
-    'https://pms-t7l8.onrender.com',   # ✅ must include https://
-]
-
+RENDER_EXTERNAL_HOSTNAME = os.getenv("RENDER_EXTERNAL_HOSTNAME")
 if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
     CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_EXTERNAL_HOSTNAME}")
 
 
@@ -46,7 +32,6 @@ if RENDER_EXTERNAL_HOSTNAME:
 # APPLICATIONS
 # --------------------------------------------------------
 INSTALLED_APPS = [
-    # Django Core Apps
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -56,13 +41,11 @@ INSTALLED_APPS = [
     "django_extensions",
     "django.contrib.sites",
 
-    # Allauth
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
 
-    # Project Apps
     "accounts",
     "projects",
     "tasks",
@@ -76,7 +59,7 @@ INSTALLED_APPS = [
 SITE_ID = 1
 
 # --------------------------------------------------------
-# AUTHENTICATION (Allauth Required)
+# AUTHENTICATION
 # --------------------------------------------------------
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
@@ -88,8 +71,6 @@ LOGOUT_REDIRECT_URL = "/user/login/"
 LOGIN_REDIRECT_URL = "/dashboard/global/"
 ACCOUNT_SIGNUP_REDIRECT_URL = "/dashboard/"
 
-
-# New allauth settings (fixed deprecated issues)
 ACCOUNT_SIGNUP_FIELDS = ["email", "username", "password1", "password2"]
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = True
@@ -99,17 +80,13 @@ SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_AUTO_SIGNUP = False
 SOCIALACCOUNT_ADAPTER = "accounts.adapters.CustomSocialAccountAdapter"
 
-# --------------------------------------------------------
-# GOOGLE LOGIN (YOUR FINAL WORKING CONFIG)
-# --------------------------------------------------------
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
-        
         "SCOPE": ["profile", "email"],
         "AUTH_PARAMS": {
             "access_type": "online",
-            "prompt": "select_account"
-            },
+            "prompt": "select_account",
+        },
     }
 }
 
@@ -132,10 +109,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-
-    # Required by allauth
     "allauth.account.middleware.AccountMiddleware",
-
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -154,7 +128,7 @@ TEMPLATES = [
             "context_processors": [
                 "django.template.context_processors.debug",
                 "django.contrib.auth.context_processors.auth",
-                "django.template.context_processors.request",  # Required
+                "django.template.context_processors.request",
                 "django.contrib.messages.context_processors.messages",
             ],
         },
@@ -179,9 +153,6 @@ else:
             "PASSWORD": "root",
             "HOST": "localhost",
             "PORT": "3306",
-            "OPTIONS": {
-                "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
-            },
         }
     }
 
@@ -211,11 +182,10 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
-
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # --------------------------------------------------------
 # EMAIL
