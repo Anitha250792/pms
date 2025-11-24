@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="fw-bold text-white">🔔 Notifications</h3>
+        <a href="{% url 'dashboard:dashboard' %}" class="btn btn-outline-light btn-sm">
+            ← Back to Dashboard
+        </a>
+    </div>
+
+    <div class="card shadow-lg border-0" 
+         style="border-radius: 14px; background: rgba(255,255,255,0.90);">
+        <div class="card-body">
+
+            {% if notifications %}
+                <ul class="list-group list-group-flush">
+
+                    {% for n in notifications %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center"
+                        style="background: {% if not n.is_read %}#eefcff{% else %}white{% endif %};">
+
+                        <div>
+                            <strong>{{ n.message }}</strong><br>
+                            <small class="text-muted">
+                                {{ n.created_at|timesince }} ago
+                            </small>
+                        </div>
+
+                        {% if n.link %}
+                        <a href="{{ n.link }}" 
+                           class="btn btn-sm btn-primary fw-semibold"
+                           onclick="markRead({{ n.id }})">
+                           View →
+                        </a>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+
+                </ul>
+            {% else %}
+                <p class="text-center text-muted mb-0">No notifications found.</p>
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+
+
+<script>
+function markRead(id) {
+    fetch(`/notifications/read/${id}/`)
+        .then(res => res.json())
+        .then(data => console.log("Read:", data));
+}
+</script>
+{% endblock %}
