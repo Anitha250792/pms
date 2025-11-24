@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Design Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+
+    <h2 class="text-center text-white fw-bold mb-4">🎨 Design Team Dashboard</h2>
+
+    <div class="text-end mb-3">
+        <a href="/projects/" class="btn btn-light">Choose Project</a>
+    </div>
+
+    <div class="row">
+        {% for item in uploads %}
+        <div class="col-md-4 mb-4">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="fw-bold">{{ item.project.name }}</h5>
+                    <p>Version: <strong>{{ item.version }}</strong></p>
+                    <p>Uploaded: {{ item.created_at|date:"d M Y" }}</p>
+
+                    <a href="{% url 'design:design_details' item.id %}" 
+                       class="btn btn-primary w-100">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-white text-center">No designs uploaded yet.</p>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

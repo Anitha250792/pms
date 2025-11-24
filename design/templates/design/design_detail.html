@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Design Detail{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+  <h2 class="fw-bold text-white text-center mb-4">
+    Design Versions – {{ project.name }}
+  </h2>
+
+  {% for u in uploads %}
+  <div class="card shadow mb-3">
+    <div class="card-body">
+      <h5 class="fw-bold">Version {{ u.version }}</h5>
+
+      {% if u.link %}
+      <p><a href="{{ u.link }}" target="_blank">Open Design Link</a></p>
+      {% endif %}
+
+      {% if u.file %}
+      <p><a href="{{ u.file.url }}" target="_blank">Download File</a></p>
+      {% endif %}
+
+      <p class="text-secondary">{{ u.comment }}</p>
+      <small>Uploaded by {{ u.uploaded_by }} on {{ u.uploaded_at }}</small>
+    </div>
+  </div>
+  {% empty %}
+  <p class="text-center text-light">No designs uploaded yet.</p>
+  {% endfor %}
+</div>
+{% endblock %}

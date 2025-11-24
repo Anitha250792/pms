@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Design Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+  <h2 class="text-white text-center fw-bold mb-3">Design Dashboard</h2>
+
+  {% if is_designer %}
+  <p class="text-center text-light mb-4">
+    Upload design links, assets, and share updates with your manager.
+  </p>
+  {% else %}
+  <p class="text-center text-warning mb-4">
+    Read-only mode – you are not a design team member.
+  </p>
+  {% endif %}
+
+  <!-- Projects List -->
+  <div class="row">
+    {% for p in projects %}
+    <div class="col-md-4 mb-3">
+      <div class="card shadow">
+        <div class="card-body">
+          <h5 class="fw-bold">{{ p.name }}</h5>
+          <p>{{ p.description|truncatewords:12 }}</p>
+
+          <a href="{% url 'design:design_detail' p.id %}" class="btn btn-primary btn-sm w-100 mb-2">View Designs</a>
+
+          {% if is_designer %}
+          <a href="{% url 'design:upload_design' p.id %}" class="btn btn-success btn-sm w-100">
+            Upload Design
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <p class="text-light text-center">No projects found.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
