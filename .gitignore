@@ -1,0 +1,22 @@
+# Ignore environment variables
+.env
+
+# Python
+__pycache__/
+*.pyc
+
+# Django static collect output
+/staticfiles/
+/media/
+
+# VS Code
+.vscode/
+
+# MySQL/PostgreSQL dumps
+*.sql
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
