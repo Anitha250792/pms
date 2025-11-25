@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% block title %}Module Details{% endblock %}
+
+{% block content %}
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .task-container {
+    margin-top: 80px;
+    animation: fadeIn 0.8s ease;
+    padding: 2rem;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+  }
+
+  .section-title {
+    font-weight: 700;
+    color: #0288d1;
+  }
+
+  .info-box {
+    color: black;
+    background: rgba(240,248,255,0.8);
+    padding: 1rem 1.2rem;
+    border-left: 4px solid #0288d1;
+    border-radius: 12px;
+    margin-bottom: 15px;
+  }
+
+  .badge-status {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+
+  .progress {
+    height: 12px;
+    border-radius: 20px;
+    background: #ddd;
+  }
+</style>
+
+
+<div class="container task-container">
+
+  <h2 class="text-center fw-bold text-dark mb-4">
+    {{ task.title }} — <span class="text-primary">Module Overview</span>
+  </h2>
+
+  <h4 class="section-title"><i class="bi bi-info-circle"></i> Module Information</h4>
+
+  <div class="info-box">
+    <strong>Title:</strong> {{ task.title }}
+  </div>
+
+  <div class="info-box">
+    <strong>Description:</strong><br> {{ task.description }}
+  </div>
+
+  <div class="row">
+
+    <div class="col-md-4">
+      <div class="info-box">
+        <strong>Status:</strong><br>
+        {% if task.status == "Completed" %}
+          <span class="badge bg-success badge-status">Completed</span>
+        {% elif task.status == "In Progress" %}
+          <span class="badge bg-warning text-dark badge-status">In Progress</span>
+        {% else %}
+          <span class="badge bg-danger badge-status">Pending</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="info-box">
+        <strong>Priority:</strong><br>
+        {% if task.priority == "High" %}
+          <span class="badge bg-danger badge-status">High</span>
+        {% elif task.priority == "Medium" %}
+          <span class="badge bg-warning text-dark badge-status">Medium</span>
+        {% else %}
+          <span class="badge bg-success badge-status">Low</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="info-box">
+        <strong>Assigned To:</strong><br>
+        {{ task.assigned_to.username|default:"Not Assigned" }}
+      </div>
+    </div>
+
+  </div>
+
+
+  <div class="row mt-2">
+    <div class="col-md-6">
+      <div class="info-box">
+        <strong>Due Date:</strong><br>
+        {{ task.due_date|date:"M d, Y" }}
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="info-box">
+        <strong>Completion:</strong><br>
+
+        <div class="progress">
+          <div class="progress-bar
+            {% if task.completion < 40 %} bg-danger
+            {% elif task.completion < 70 %} bg-warning
+            {% else %} bg-success {% endif %}"
+            style="width: {{ task.completion }}%;">
+          </div>
+        </div>
+
+        <small class="fw-bold text-dark">{{ task.completion }}%</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <strong>Created By:</strong><br>
+    {{ task.owner.username|default:"Team Member" }}
+  </div>
+
+</div>
+
+{% endblock %}

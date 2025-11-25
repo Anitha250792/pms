@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}All Projects{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+
+  <h2 class="text-center fw-bold text-white mb-4">All Projects</h2>
+
+  {% if projects %}
+  
+    <div class="table-responsive">
+      <table class="table table-hover table-bordered text-center">
+        <thead class="table-dark">
+          <tr>
+            <th>Name</th>
+            <th>Owner</th>
+            <th>Assigned To</th>
+            <th>Status</th>
+            <th>Priority</th>
+            <th>Completion</th>
+            <th>View</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in projects %}
+            <tr>
+              <td>{{ p.name }}</td>
+              <td>{{ p.owner.username|default:"-" }}</td>
+              <td>{{ p.assigned_to.username|default:"Unassigned" }}</td>
+
+              <td>
+                <span class="badge bg-info">{{ p.status }}</span>
+              </td>
+
+              <td>
+                <span class="badge bg-warning text-dark">{{ p.priority }}</span>
+              </td>
+
+              <td>
+                <div class="progress">
+                  <div class="progress-bar" style="width: {{ p.completion }}%;"></div>
+                </div>
+                <small>{{ p.completion }}%</small>
+              </td>
+
+              <td>
+                <a href="{% url 'projects:project_detail_readonly' p.id %}"
+                   class="btn btn-sm btn-primary">
+                  View
+                </a>
+              </td>
+
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="text-center text-muted">No projects found.</p>
+  {% endif %}
+
+</div>
+{% endblock %}

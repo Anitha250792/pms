@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block title %}Task — {{ task.title }}{% endblock %}
+
+{% block content %}
+<style>
+#toastMessage {
+  display: none;
+  position: fixed;
+  top: 25px;
+  right: 25px;
+  min-width: 250px;
+  padding: 14px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  color: #fff;
+  z-index: 9999;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.5s ease, transform 0.4s ease;
+}
+#toastMessage.show { display:block; opacity:1; transform:translateY(0); }
+.toast-success { background: linear-gradient(45deg,#43a047,#66bb6a); }
+.toast-error { background: linear-gradient(45deg,#e53935,#f4511e); }
+</style>
+
+<div class="container" style="max-width:900px;margin-top:70px;">
+  <div class="card p-4 shadow">
+    <h3>{{ task.title }}</h3>
+    <p class="text-muted">{{ task.description }}</p>
+
+    <ul class="list-group mb-3">
+      <li class="list-group-item"><strong>Assigned To:</strong> {{ task.assigned_to.username|default:"Unassigned" }}</li>
+      <li class="list-group-item"><strong>Due Date:</strong> {{ task.due_date|date:"M d, Y" }}</li>
+      <li class="list-group-item"><strong>Priority:</strong> {{ task.priority }}</li>
+    </ul>
+
+    {% if readonly %}
+      <div class="alert alert-info">👁️ Viewing in <strong>read-only</strong> mode.</div>
+      <div class="mb-3"><strong>Status:</strong> {{ task.status }}</div>
+      <div class="mb-3"><strong>Completion:</strong> {{ task.completion }}%</div>
+      <a href="{% url 'tasks:task_list' %}" class="btn btn-secondary">← Back</a>
+    {% else %}
+      <!-- Editable Status -->
+      <form id="statusForm" class="mb-3">
+        {% csrf_token %}
+        <label class="form-label"><strong>Status:</strong></label>
+        <select name="status" id="statusSelect" class="form-select">
+          <option value="Pending" {% if task.status == "Pending" %}selected{% endif %}>Pending</option>
+          <option value="In Progress" {% if task.status == "In Progress" %}selected{% endif %}>In Progress</option>
+          <option value="Completed" {% if task.status == "Completed" %}selected{% endif %}>Completed</option>
+        </select>
+        <button type="submit" class="btn btn-primary mt-2">💾 Save Status</button>
+      </form>
+
+      <!-- Editable Completion -->
+      <form id="completionForm">
+        {% csrf_token %}
+        <label class="form-label"><strong>Completion (%):</strong></label>
+        <input type="number" name="completion" id="completionInput" class="form-control"
+               min="0" max="100" value="{{ task.completion|default:0 }}">
+        <button type="submit" class="btn btn-success mt-2">💾 Save Completion</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+<div id="toastMessage"></div>
+
+<script>
+function showToast(message, type="success") {
+  const toast = document.getElementById("toastMessage");
+  toast.className = "";
+  toast.textContent = message;
+  toast.classList.add("show", type === "success" ? "toast-success" : "toast-error");
+  setTimeout(() => toast.classList.remove("show"), 2000);
+}
+
+// ✅ Get CSRF token
+function getCSRF() { return document.querySelector('[name=csrfmiddlewaretoken]').value; }
+
+// ✅ Update Status
+const statusForm = document.getElementById("statusForm");
+if (statusForm) {
+  statusForm.addEventListener("submit", async e => {
+    e.preventDefault();
+    const formData = new FormData(statusForm);
+    const res = await fetch("{% url 'tasks:update_task_status' task.id %}", {
+      method: "POST",
+      headers: { "X-CSRFToken": getCSRF() },
+      body: formData
+    });
+    const data = await res.json();
+    if (data.success) showToast("✅ Status updated successfully!", "success");
+    else showToast("❌ " + (data.error || "Update failed"), "error");
+  });
+}
+
+// ✅ Update Completion
+const completionForm = document.getElementById("completionForm");
+if (completionForm) {
+  completionForm.addEventListener("submit", async e => {
+    e.preventDefault();
+    const formData = new FormData(completionForm);
+    const res = await fetch("{% url 'tasks:update_task_completion' task.id %}", {
+      method: "POST",
+      headers: { "X-CSRFToken": getCSRF() },
+      body: formData
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast("✅ Completion updated successfully!", "success");
+      // Update the visible input instantly
+      document.getElementById("completionInput").value = formData.get("completion");
+    } else {
+      showToast("❌ " + (data.error || "Update failed"), "error");
+    }
+  });
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}HR Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+  <!-- PAGE TITLE -->
+  <h2 class="mb-4 text-white fw-bold text-center">
+    HR Dashboard
+  </h2>
+
+  <!-- ========================= -->
+  <!-- HR ANNOUNCEMENT COMPOSER -->
+  <!-- ========================= -->
+  {% if user.role == "HR" %}
+  <div class="card mb-4 shadow-lg border-0">
+    <div class="card-header bg-primary text-white fw-semibold">
+      📢 Post New Announcement
+    </div>
+
+    <div class="card-body">
+      <form id="announceForm">
+        {% csrf_token %}
+        <div class="mb-3">
+          {{ form.content }}
+        </div>
+
+        <button type="submit" class="btn btn-success px-4">
+          <i class="bi bi-send-fill me-1"></i> Send Announcement
+        </button>
+      </form>
+
+      <div id="announceErrors" class="text-danger mt-2"></div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ========================= -->
+  <!-- RECENT ANNOUNCEMENTS -->
+  <!-- ========================= -->
+  <div class="card mb-4 shadow border-0">
+    <div class="card-header bg-info text-white fw-semibold">
+      🗂 Recent Announcements
+    </div>
+
+    <div class="card-body" style="max-height: 250px; overflow-y: auto;">
+      {% for msg in messages %}
+        <div class="p-2 mb-2 rounded bg-light">
+          <b>{{ msg.sender.username|default:"HR" }}</b>: {{ msg.content }}<br>
+          <small class="text-muted">{{ msg.created_at }}</small>
+        </div>
+      {% empty %}
+        <p>No announcements yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ========================= -->
+  <!-- TEAM OVERVIEW -->
+  <!-- ========================= -->
+  <div class="card mb-4 shadow border-0">
+    <div class="card-header fw-semibold bg-secondary text-white">
+      Team Members & Managers
+    </div>
+
+    <ul class="list-group list-group-flush">
+      {% for member in team %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          <b>{{ member.username }}</b>  
+        </div>
+        <span class="badge bg-primary px-3 py-2">{{ member.role }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <!-- ========================= -->
+  <!-- ALL PROJECTS -->
+  <!-- ========================= -->
+  <div class="card mb-4 shadow border-0">
+    <div class="card-header fw-semibold bg-dark text-white">
+      📁 All Projects
+    </div>
+
+    <ul class="list-group list-group-flush">
+      {% for project in projects %}
+      <li class="list-group-item">
+        <div class="fw-bold">{{ project.name }}</div>
+        <div>
+          Status: <span class="text-success">{{ project.status }}</span>
+        </div>
+        <small class="text-muted">
+          Assigned to: {{ project.assigned_to|default:"Not Assigned" }}
+        </small>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+</div>
+
+
+<!-- ========================= -->
+<!-- AJAX ANNOUNCEMENT POST -->
+<!-- ========================= -->
+<script>
+document.getElementById("announceForm")?.addEventListener("submit", function (e) {
+  e.preventDefault();
+  const formData = new FormData(this);
+
+  fetch("{% url 'communications:post_announcement' %}", {
+    method: "POST",
+    headers: { "X-CSRFToken": formData.get("csrfmiddlewaretoken") },
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      Swal.fire({
+        title: "Announcement Sent!",
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false
+      });
+
+      document.getElementById("announceErrors").innerHTML = "";
+      this.reset();
+    } else {
+      let err = "";
+      for (let key in data.errors) {
+        err += `${data.errors[key]} <br>`;
+      }
+      document.getElementById("announceErrors").innerHTML = err;
+    }
+  });
+});
+</script>
+
+{% endblock %}

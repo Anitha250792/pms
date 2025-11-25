@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% block title %}Project Details{% endblock %}
+
+{% block content %}
+<style>
+  @keyframes fadeIn {
+    from { opacity:0; transform:translateY(20px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+
+  .project-container {
+    color: black;
+    margin-top: 80px;
+    animation: fadeIn 0.8s ease;
+    background: rgba(255,255,255,0.95);
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+  }
+
+  .info-box {
+    background: rgba(240,248,255,0.8);
+    padding: 1rem;
+    border-left: 4px solid #0288d1;
+    border-radius: 12px;
+    margin-bottom: 15px;
+  }
+
+  .badge-status { padding: 6px 12px; border-radius: 10px; }
+  .progress { height: 10px; border-radius: 20px; }
+</style>
+
+<div class="container project-container">
+
+  <h2 class="text-center fw-bold text-dark mb-4">
+    {{ project.name }} — <span class="text-primary">Overview</span>
+  </h2>
+
+  <h4 class="section-title">📌 Project Information</h4>
+
+  <div class="info-box"><strong>Name:</strong> {{ project.name }}</div>
+
+  <div class="info-box">
+    <strong>Description:</strong><br>{{ project.description }}
+  </div>
+
+  <div class="row">
+    <div class="col-md-4">
+      <div class="info-box"><strong>Priority:</strong>
+        {% if project.priority == "High" %}
+          <span class="badge bg-danger badge-status">High</span>
+        {% elif project.priority == "Medium" %}
+          <span class="badge bg-warning text-dark badge-status">Medium</span>
+        {% else %}
+          <span class="badge bg-success badge-status">Low</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="info-box"><strong>Status:</strong>
+        {% if project.status == "Completed" %}
+          <span class="badge bg-success badge-status">Completed</span>
+        {% elif project.status == "In Progress" %}
+          <span class="badge bg-warning text-dark badge-status">In Progress</span>
+        {% else %}
+          <span class="badge bg-danger badge-status">Pending</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="info-box"><strong>Assigned To:</strong>
+        {{ project.assigned_to.username|default:"Not Assigned" }}
+      </div>
+    </div>
+  </div>
+
+  <div class="info-box"><strong>Created By:</strong> {{ project.owner.username }}</div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="info-box"><strong>Assigned Date:</strong> {{ project.assigned_date|date:"M d, Y" }}</div>
+    </div>
+    <div class="col-md-6">
+      <div class="info-box"><strong>Delivery Date:</strong> {{ project.delivery_date|date:"M d, Y" }}</div>
+    </div>
+  </div>
+
+  <div class="info-box"><strong>Remarks:</strong><br>{{ project.remark|default:"No remarks added" }}</div>
+
+  <hr>
+
+  <h4 class="section-title">📝 Modules (Read Only)</h4>
+
+  <div class="table-responsive">
+    <table class="table table-bordered text-center align-middle">
+      <thead class="table-primary">
+        <tr>
+          <th>Title</th>
+          <th>Status</th>
+          <th>Priority</th>
+          <th>Completion</th>
+          <th>Due Date</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for task in tasks %}
+        <tr>
+          <td class="fw-bold">{{ task.title }}</td>
+
+          <td>
+            {% if task.status == "Completed" %}
+              <span class="badge bg-success">Completed</span>
+            {% elif task.status == "In Progress" %}
+              <span class="badge bg-warning text-dark">In Progress</span>
+            {% else %}
+              <span class="badge bg-danger">Pending</span>
+            {% endif %}
+          </td>
+
+          <td>
+            {% if task.priority == "High" %}
+              <span class="badge bg-danger">High</span>
+            {% elif task.priority == "Medium" %}
+              <span class="badge bg-warning text-dark">Medium</span>
+            {% else %}
+              <span class="badge bg-success">Low</span>
+            {% endif %}
+          </td>
+
+          <td>
+            <div class="progress">
+              <div class="progress-bar
+                {% if task.completion < 40 %}bg-danger
+                {% elif task.completion < 70 %}bg-warning
+                {% else %}bg-success{% endif %}"
+                style="width: {{ task.completion }}%">
+              </div>
+            </div>
+            <small>{{ task.completion }}%</small>
+          </td>
+
+          <td>{{ task.due_date|date:"M d, Y" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-muted">No modules found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="text-center mt-4">
+    <a href="{% url 'projects:project_list' %}" class="btn btn-secondary">← Back</a>
+  </div>
+
+</div>
+{% endblock %}

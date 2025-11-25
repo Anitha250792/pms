@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Design Team Dashboard{% endblock %}
+
+{% block content %}
+
+<style>
+    .design-card {
+        background: rgba(255,255,255,0.85);
+        backdrop-filter: blur(8px);
+        border-radius: 18px;
+        padding: 25px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
+    .upload-card {
+        background: rgba(255,255,255,0.92);
+        border-radius: 18px;
+        padding: 25px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
+    .glow-title {
+        text-align: center;
+        color: white;
+        text-shadow: 0 0 15px rgba(255,255,255,0.8);
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+</style>
+
+<div class="container mt-5">
+
+    <h2 class="glow-title mb-4">Design Team Dashboard</h2>
+
+    {% if can_upload %}
+    <!-- Upload Form -->
+    <div class="upload-card mb-4">
+        <h4 class="fw-bold mb-3">Upload New Design</h4>
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="mb-3">{{ form.project_name.label_tag }}{{ form.project_name }}</div>
+            <div class="mb-3">{{ form.design_link.label_tag }}{{ form.design_link }}</div>
+            <div class="mb-3">{{ form.assigned_to.label_tag }}{{ form.assigned_to }}</div>
+            <div class="mb-3">{{ form.notes.label_tag }}{{ form.notes }}</div>
+
+            <button class="btn btn-primary w-100 fw-semibold">Upload Design</button>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- All Designs List -->
+    <div class="design-card">
+        <h4 class="fw-bold mb-3">📁 Submitted Designs</h4>
+
+        <table class="table table-hover table-bordered align-middle bg-white">
+            <thead class="table-dark">
+                <tr>
+                    <th>Project</th>
+                    <th>Designer</th>
+                    <th>Assigned To</th>
+                    <th>Design Link</th>
+                    <th>Notes</th>
+                    <th>Submitted On</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for d in designs %}
+                <tr>
+                    <td><b>{{ d.project_name }}</b></td>
+                    <td>{{ d.designer.username }}</td>
+                    <td>{{ d.assigned_to.username }}</td>
+                    <td><a href="{{ d.design_link }}" target="_blank">View Design</a></td>
+                    <td>{{ d.notes|default:"-" }}</td>
+                    <td>{{ d.created_at|date:"M d, Y H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted">No designs uploaded yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

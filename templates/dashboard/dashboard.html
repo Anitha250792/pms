@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | Project Management Tool{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+  <div class="col-12">
+    <h2 class="text-white">Welcome, {{ request.user.username }}</h2>
+    <p class="text-light-50">Here’s a quick overview of your productivity.</p>
+  </div>
+</div>
+
+<div class="row g-4">
+
+  <div class="col-md-3">
+    <div class="card shadow border-0 rounded-4">
+      <div class="card-body">
+        <h6 class="text-muted mb-1">Total Projects</h6>
+        <h3>{{ total_projects|default:"0" }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card shadow border-0 rounded-4">
+      <div class="card-body">
+        <h6 class="text-muted mb-1">Total Tasks</h6>
+        <h3>{{ total_tasks|default:"0" }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card shadow border-0 rounded-4">
+      <div class="card-body">
+        <h6 class="text-muted mb-1">Completed Tasks</h6>
+        <h3 class="text-success">{{ completed_tasks|default:"0" }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card shadow border-0 rounded-4">
+      <div class="card-body">
+        <h6 class="text-muted mb-1">Pending Tasks</h6>
+        <h3 class="text-warning">{{ pending_tasks|default:"0" }}</h3>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="row g-4 mt-3">
+  <div class="col-md-7">
+    <div class="card shadow border-0 rounded-4">
+      <div class="card-body">
+        <h5 class="mb-3">Recent Tasks</h5>
+        {% if recent_tasks %}
+          <ul class="list-group list-group-flush">
+            {% for t in recent_tasks %}
+              <li class="list-group-item d-flex justify-content-between">
+                <span>{{ t.title }}</span>
+                <span class="badge bg-secondary">{{ t.status }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-muted mb-0">No recent tasks yet.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-5">
+    <div class="card shadow border-0 rounded-4">
+      <div class="card-body">
+        <h5 class="mb-3">Quick Actions</h5>
+        <a href="{% url 'projects:project_create' %}" class="btn btn-light w-100 mb-2">
+          <i class="bi bi-folder-plus me-2"></i> Create New Project
+        </a>
+        <a href="{% url 'tasks:task_create' %}" class="btn btn-light w-100">
+          <i class="bi bi-plus-circle me-2"></i> Create New Task
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

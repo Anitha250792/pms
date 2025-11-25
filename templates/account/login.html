@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load socialaccount %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+
+<style>
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh;
+        position: relative;
+        z-index: 10;
+    }
+
+    .login-card {
+        width: 420px;
+        background: rgba(255, 255, 255, 0.92);
+        padding: 35px;
+        border-radius: 16px;
+        backdrop-filter: blur(6px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.20);
+        animation: fadeIn .6s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    .form-label{
+        color: black;
+    }
+    .password-wrapper { position: relative; }
+    .toggle-password {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        font-size: 18px;
+        color: #555;
+    }
+
+    .google-btn {
+        border: 1px solid #d0d4d9;
+        border-radius: 10px;
+        padding: 12px;
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        background: #fff;
+        cursor: pointer;
+        transition: .25s;
+        font-weight: 500;
+    }
+    .google-btn:hover {
+        background: #f1f3f5;
+        transform: translateY(-2px);
+    }
+</style>
+
+<div class="login-container">
+    <div class="login-card">
+
+        <h3 class="text-center fw-bold mb-4">Welcome Back</h3>
+
+        <form method="POST" action="{% url 'account_login' %}">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <div class="mb-3">
+                <label class="form-label">Email or Username</label>
+                <input type="text" name="login" class="form-control"
+                       placeholder="Enter email or username"
+                       value="{{ form.login.value|default:'' }}">
+            </div>
+
+            <div class="mb-3 password-wrapper">
+                <label class="form-label">Password</label>
+                <input type="password" name="password" id="id_password"
+                       class="form-control" placeholder="Enter password">
+                <span class="toggle-password" data-target="id_password">👁️</span>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 mt-2">Login</button>
+        </form>
+
+        <div class="text-end mt-2">
+            <a href="{% url 'account_reset_password' %}" class="text-decoration-none">Forgot Password?</a>
+        </div>
+
+        <hr>
+
+        <a href="{% provider_login_url 'google' %}">
+            <div class="google-btn">
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="22">
+                Continue with Google
+            </div>
+        </a>
+
+        <p class="text-center mt-3">
+            Don’t have an account? <a href="{% url 'account_signup' %}">Create one</a>
+        </p>
+
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".toggle-password").forEach(icon => {
+        icon.addEventListener("click", function () {
+            let input = document.getElementById(this.dataset.target);
+            if (input.type === "password") {
+                input.type = "text";
+                this.textContent = "🙈";
+            } else {
+                input.type = "password";
+                this.textContent = "👁️";
+            }
+        });
+    });
+});
+</script>
+
+{% endblock %}

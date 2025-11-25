@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}All Modules{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+
+  <h2 class="text-center fw-bold text-white mb-4">All Modules</h2>
+
+  {% if tasks %}
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover text-center">
+        <thead class="table-dark">
+          <tr>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Priority</th>
+            <th>Assigned To</th>
+            <th>Completion</th>
+            <th>Due Date</th>
+            <th>View</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for t in tasks %}
+            <tr>
+              <td>{{ t.title }}</td>
+
+              <td>
+                <span class="badge bg-info">{{ t.status }}</span>
+              </td>
+
+              <td>
+                <span class="badge bg-warning text-dark">{{ t.priority }}</span>
+              </td>
+
+              <td>{{ t.assigned_to.username|default:"-" }}</td>
+
+              <td>
+                <div class="progress">
+                  <div class="progress-bar" style="width: {{ t.completion }}%"></div>
+                </div>
+                <small>{{ t.completion }}%</small>
+              </td>
+
+              <td>{{ t.due_date|date:"M d, Y" }}</td>
+
+              <td>
+                <a href="{% url 'tasks:task_detail_readonly' t.id %}"
+                   class="btn btn-sm btn-primary">
+                  View
+                </a>
+              </td>
+
+            </tr>
+          {% endfor %}
+        </tbody>
+
+      </table>
+    </div>
+
+  {% else %}
+    <p class="text-center text-muted">No modules found.</p>
+  {% endif %}
+
+</div>
+{% endblock %}

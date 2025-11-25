@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load socialaccount %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="card shadow-lg p-4" style="width: 420px; border-radius: 15px; background: rgba(255,255,255,0.95);">
+
+        <h3 class="text-center fw-bold mb-4">Create Account</h3>
+
+        <form method="POST" action="{% url 'account_signup' %}">
+            {% csrf_token %}
+
+            {{ form.non_field_errors }}
+
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-control" placeholder="Enter email"
+                       value="{{ form.email.value|default:'' }}">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Username</label>
+                <input type="text" name="username" class="form-control" placeholder="Choose username"
+                       value="{{ form.username.value|default:'' }}">
+            </div>
+
+            <div class="mb-3 password-wrapper">
+    <label class="form-label">Password</label>
+    <input type="password" name="password1" id="id_password1" class="form-control" placeholder="Enter password">
+    <span class="toggle-password" data-target="id_password1">👁️</span>
+</div>
+
+<div class="mb-3 password-wrapper">
+    <label class="form-label">Confirm Password</label>
+    <input type="password" name="password2" id="id_password2" class="form-control" placeholder="Confirm password">
+    <span class="toggle-password" data-target="id_password2">👁️</span>
+</div>
+
+
+            <button type="submit" class="btn btn-primary w-100 mt-2">Sign Up</button>
+        </form>
+
+        <hr>
+
+        <a class="btn btn-light border w-100 d-flex align-items-center justify-content-center gap-2"
+           href="{% provider_login_url 'google' %}">
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="22">
+            Sign Up with Google
+        </a>
+
+        <p class="text-center mt-3">
+            Already have an account?
+            <a href="{% url 'account_login' %}">Login</a>
+        </p>
+
+    </div>
+</div>
+
+{% endblock %}
