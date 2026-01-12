@@ -84,9 +84,10 @@ AUTHENTICATION_BACKENDS = [
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
-LOGIN_URL = "/user/login/"
-LOGOUT_REDIRECT_URL = "/user/login/"
+LOGIN_URL = "/login/"
+LOGOUT_REDIRECT_URL = "/login/"
 LOGIN_REDIRECT_URL = "/dashboard/global/"
+
 ACCOUNT_SIGNUP_REDIRECT_URL = "/dashboard/"
 
 ACCOUNT_EMAIL_REQUIRED = True
