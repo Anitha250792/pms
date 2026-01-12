@@ -6,12 +6,12 @@ Author: Ani
 from pathlib import Path
 import os
 import dj_database_url
-import pymysql
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-pymysql.install_as_MySQLdb()
-
+# --------------------------------------------------------
+# SECURITY
+# --------------------------------------------------------
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-change-this-to-a-secure-key")
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
@@ -21,13 +21,12 @@ DEBUG = os.getenv("DEBUG", "True") == "True"
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
-    "pms-t7l8.onrender.com",
+    ".onrender.com",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8000",
     "http://localhost:8000",
-    "https://pms-t7l8.onrender.com",
 ]
 
 RENDER_EXTERNAL_HOSTNAME = os.getenv("RENDER_EXTERNAL_HOSTNAME")
@@ -46,8 +45,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django_extensions",
     "django.contrib.sites",
+
+    # Extensions
+    "django_extensions",
 
     # Allauth
     "allauth",
@@ -64,7 +65,7 @@ INSTALLED_APPS = [
     "design",
     "notifications",
 
-    # WebSocket Channels
+    # Channels
     "channels",
 ]
 
@@ -87,8 +88,8 @@ ACCOUNT_SIGNUP_REDIRECT_URL = "/dashboard/"
 
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = True
-ACCOUNT_SIGNUP_FIELDS = ["email", "username", "password1", "password2"]
 ACCOUNT_LOGIN_METHODS = {"username", "email"}
+ACCOUNT_SIGNUP_FIELDS = ["email", "username", "password1", "password2"]
 
 SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_AUTO_SIGNUP = False
@@ -97,10 +98,7 @@ SOCIALACCOUNT_ADAPTER = "accounts.adapters.CustomSocialAccountAdapter"
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
         "SCOPE": ["profile", "email"],
-        "AUTH_PARAMS": {
-            "access_type": "online",
-            "prompt": "select_account",
-        },
+        "AUTH_PARAMS": {"prompt": "select_account"},
     }
 }
 
@@ -151,13 +149,20 @@ TEMPLATES = [
 WSGI_APPLICATION = "backend.wsgi.application"
 
 # --------------------------------------------------------
-# DATABASE (MySQL Local / PostgreSQL Render)
+# DATABASE CONFIGURATION
 # --------------------------------------------------------
-if os.getenv("RENDER"):  # When deployed on Render
+if os.getenv("RENDER"):  # Render = PostgreSQL
     DATABASES = {
-        "default": dj_database_url.config(default=os.getenv("DATABASE_URL"))
+        "default": dj_database_url.config(
+            default=os.getenv("DATABASE_URL"),
+            conn_max_age=600,
+            ssl_require=True,
+        )
     }
-else:
+else:  # Local = MySQL
+    import pymysql
+    pymysql.install_as_MySQLdb()
+
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.mysql",

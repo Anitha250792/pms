@@ -121,20 +121,21 @@ def task_edit(request, pk):
     task = get_object_or_404(Task, pk=pk)
 
     # Only assigned user or owner can edit
-    if request.user != task.assigned_to and request.user != getattr(task, 'owner', None):
+    if request.user != task.assigned_to and request.user != task.owner:
         messages.error(request, "You are not authorized to edit this task.")
         return redirect("tasks:task_detail", pk=pk)
 
     if request.method == "POST":
         form = TaskForm(request.POST, instance=task)
         if form.is_valid():
-            form.save()
+            form.save()  # ✅ Saves completion, status, etc.
             messages.success(request, "Task updated successfully.")
-            return redirect("tasks:task_list")
+            return redirect("tasks:task_list")  # ✅ redirect back to list to show update
     else:
         form = TaskForm(instance=task)
 
     return render(request, "tasks/task_form.html", {"form": form, "task": task})
+
 
 
 # -----------------------------------------------------
