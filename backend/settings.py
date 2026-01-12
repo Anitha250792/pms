@@ -109,6 +109,7 @@ SOCIALACCOUNT_PROVIDERS = {
         "AUTH_PARAMS": {"prompt": "select_account"},
     }
 }
+SOCIALACCOUNT_ENABLED = False
 
 
 # --------------------------------------------------------
