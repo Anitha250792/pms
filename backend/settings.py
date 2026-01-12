@@ -55,6 +55,8 @@ INSTALLED_APPS = [
     # Allauth
     "allauth",
     "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
   
     
 
@@ -102,6 +104,12 @@ ACCOUNT_SIGNUP_FIELDS = [
 
 SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_AUTO_SIGNUP = False
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "SCOPE": ["profile", "email"],
+        "AUTH_PARAMS": {"prompt": "select_account"},
+    }
+}
 
 
 # --------------------------------------------------------
