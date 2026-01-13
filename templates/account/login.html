@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% load socialaccount %}
+
 {% block title %}Login{% endblock %}
 
 {% block content %}
@@ -93,12 +93,7 @@
 
         <hr>
 
-       <a href="{% provider_login_url 'google' %}">
-            <div class="google-btn">
-                <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="22">
-                Continue with Google
-            </div>
-        </a> 
+       
 
         <p class="text-center mt-3">
             Don’t have an account? <a href="{% url 'account_signup' %}">Create one</a>
