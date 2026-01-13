@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load socialaccount %}
+
 
 {% block title %}Sign Up{% endblock %}
 
@@ -45,12 +45,7 @@
 
         <hr>
 
-        <a class="btn btn-light border w-100 d-flex align-items-center justify-content-center gap-2"
-           href="{% provider_login_url 'google' %}">
-            <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="22">
-            Sign Up with Google
-        </a>
-
+        
         <p class="text-center mt-3">
             Already have an account?
             <a href="{% url 'account_login' %}">Login</a>
